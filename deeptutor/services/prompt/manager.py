@@ -25,7 +25,7 @@ class PromptManager:
     }
 
     # Supported modules
-    MODULES = ["research", "solve", "guide", "question", "co_writer", "math_animator"]
+    MODULES = ["research", "solve", "guide", "question", "math_animator"]
 
     # Modules that are not under deeptutor/agents/ directory
     NON_AGENT_MODULES: dict[str, str] = {}
@@ -46,7 +46,7 @@ class PromptManager:
         Load prompts for an agent.
 
         Args:
-            module_name: Module name (research, solve, guide, question, co_writer)
+            module_name: Module name (research, solve, guide, question, math_animator)
             agent_name: Agent name (filename without .yaml)
             language: Language code ('zh' or 'en')
             subdirectory: Optional subdirectory (e.g., 'solve_loop' for solve module)

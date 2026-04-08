@@ -124,10 +124,6 @@ guide:
   temperature: 0.5
   max_tokens: 16192
 
-# 协作写作模块 - 协作写作 agents
-co_writer:
-  temperature: 0.7
-  max_tokens: 4096
 ```
 
 ### `data/user/settings/main.yaml` - 系统设置

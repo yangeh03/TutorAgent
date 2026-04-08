@@ -1,4 +1,4 @@
-"""Public application facades for CLI, Web, and SDK adapters."""
+"""Public application facades for Web and SDK adapters."""
 
 from .facade import CapabilityAvailability, DeepTutorApp, TurnRequest
 

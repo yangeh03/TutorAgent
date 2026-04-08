@@ -12,7 +12,6 @@ import {
   MessageSquare,
   PanelLeftClose,
   PanelLeftOpen,
-  PenLine,
   Plus,
   Settings,
   type LucideIcon,
@@ -31,7 +30,6 @@ interface NavEntry {
 const PRIMARY_NAV: NavEntry[] = [
   { href: "/", label: "Chat", icon: MessageSquare },
   { href: "/agents", label: "TutorBot", icon: Bot },
-  { href: "/co-writer", label: "Co-Writer", icon: PenLine },
   { href: "/guide", label: "Guided Learning", icon: GraduationCap },
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
   { href: "/memory", label: "Memory", icon: Brain },

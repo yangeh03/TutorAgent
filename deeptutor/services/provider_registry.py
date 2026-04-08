@@ -28,7 +28,7 @@ class ProviderSpec:
     display_name: str = ""
 
     # Which provider implementation to use:
-    # "openai_compat" | "anthropic" | "azure_openai" | "openai_codex" | "github_copilot"
+    # "openai_compat" | "anthropic" | "azure_openai"
     backend: str = "openai_compat"
 
     env_extras: tuple[tuple[str, str], ...] = ()
@@ -74,8 +74,6 @@ PROVIDER_ALIASES = {
     "volcengineCodingPlan": "volcengine_coding_plan",
     "bytepluscodingplan": "byteplus_coding_plan",
     "byteplusCodingPlan": "byteplus_coding_plan",
-    "github-copilot": "github_copilot",
-    "openai-codex": "openai_codex",
 }
 
 
@@ -205,25 +203,6 @@ PROVIDERS: tuple[ProviderSpec, ...] = (
         backend="openai_compat",
         default_api_base="https://api.openai.com/v1",
         supports_max_completion_tokens=True,
-    ),
-    ProviderSpec(
-        name="openai_codex",
-        keywords=("openai_codex", "codex"),
-        env_key="",
-        display_name="OpenAI Codex",
-        backend="openai_codex",
-        is_oauth=True,
-        default_api_base="https://chatgpt.com/backend-api",
-    ),
-    ProviderSpec(
-        name="github_copilot",
-        keywords=("github_copilot", "copilot"),
-        env_key="",
-        display_name="GitHub Copilot",
-        backend="github_copilot",
-        is_oauth=True,
-        default_api_base="https://api.githubcopilot.com",
-        strip_model_prefix=True,
     ),
     ProviderSpec(
         name="deepseek",

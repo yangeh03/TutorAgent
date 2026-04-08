@@ -22,7 +22,7 @@ DEFAULT_INTERFACE_SETTINGS = {
     "sidebar_description": "✨ Data Intelligence Lab @ HKU",
     "sidebar_nav_order": {
         "start": ["/", "/history", "/knowledge", "/notebook"],
-        "learnResearch": ["/question", "/solver", "/guide", "/research", "/co_writer"],
+        "learnResearch": ["/question", "/solver", "/guide", "/research"],
     },
 }
 
@@ -88,7 +88,6 @@ DEFAULT_AGENTS_SETTINGS = {
         "research": {"temperature": 0.5, "max_tokens": 12000},
         "question": {"temperature": 0.7, "max_tokens": 4096},
         "guide": {"temperature": 0.5, "max_tokens": 16192},
-        "co_writer": {"temperature": 0.7, "max_tokens": 4096},
     },
     "tools": {
         "brainstorm": {"temperature": 0.8, "max_tokens": 2048},
@@ -137,7 +136,6 @@ def init_user_directories(project_root: Path | None = None) -> None:
     └── workspace/
         ├── notebook/
         ├── memory/
-        ├── co-writer/
         ├── guide/
         └── chat/
             ├── chat/

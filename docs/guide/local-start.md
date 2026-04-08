@@ -20,9 +20,9 @@ pip install ".[math-animator]"   # optional
 python scripts/start_tour.py
 ```
 
-The tour runs directly in the terminal and asks whether you want `Web` or `CLI` guidance.
+The tour runs directly in the terminal and guides the Web/API setup flow.
 
-Both flows end by writing a clean project-root `.env`. Runtime behavior config is loaded only from:
+The flow ends by writing a clean project-root `.env`. Runtime behavior config is loaded only from:
 
 - `data/user/settings/main.yaml`
 - `data/user/settings/agents.yaml`
@@ -43,16 +43,6 @@ python scripts/start_web.py
 ```
 
 This launcher reads the project-root `.env`, starts the FastAPI backend, and injects `NEXT_PUBLIC_API_BASE` into the frontend process automatically.
-
-## CLI-only usage
-
-If you only want the terminal workflow, choose `CLI` inside `start_tour.py`. After that, common commands remain:
-
-```bash
-deeptutor chat
-deeptutor kb list
-deeptutor serve --port 8001
-```
 
 ## Notes
 

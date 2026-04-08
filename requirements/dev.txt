@@ -2,7 +2,7 @@
 # DeepTutor Development Dependencies
 # ============================================
 # Install: pip install -r requirements/dev.txt
-# Includes full runtime + development tooling.
+# Includes Web/API runtime + development tooling.
 
 -r server.txt
 

@@ -24,11 +24,6 @@ AGENT_REGISTRY = {
         "color": "emerald",
         "label_key": "Research Report",
     },
-    "co_writer": {
-        "icon": "PenTool",
-        "color": "amber",
-        "label_key": "Co-Writer",
-    },
     "guide": {
         "icon": "BookOpen",
         "color": "indigo",

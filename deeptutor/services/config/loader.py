@@ -214,9 +214,6 @@ def get_agent_params(module_name: str) -> dict:
             - "research": Research module agents
             - "question": Question module agents
             - "brainstorm": Brainstorm tool settings
-            - "co_writer": CoWriter module agents
-            - "narrator": Narrator agent (independent, for TTS)
-
     Returns:
         dict: Dictionary containing:
             - temperature: float, default 0.5
@@ -236,7 +233,6 @@ def get_agent_params(module_name: str) -> dict:
         "research": ("capabilities", "research"),
         "question": ("capabilities", "question"),
         "guide": ("capabilities", "guide"),
-        "co_writer": ("capabilities", "co_writer"),
         "brainstorm": ("tools", "brainstorm"),
         "vision_solver": ("plugins", "vision_solver"),
         "math_animator": ("plugins", "math_animator"),

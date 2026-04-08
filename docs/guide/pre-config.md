@@ -124,10 +124,6 @@ guide:
   temperature: 0.5
   max_tokens: 16192
 
-# CoWriter Module - Collaborative writing agents
-co_writer:
-  temperature: 0.7
-  max_tokens: 4096
 ```
 
 ### `data/user/settings/main.yaml` - System Settings

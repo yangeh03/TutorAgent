@@ -11,7 +11,6 @@ data/user/
 └── workspace/
     ├── memory/
     ├── notebook/
-    ├── co-writer/
     ├── guide/
     └── chat/
         ├── chat/
@@ -30,7 +29,6 @@ AgentModule = Literal[
     "chat",
     "question",
     "research",
-    "co-writer",
     "guide",
     "run_code_workspace",
     "logs",
@@ -49,7 +47,6 @@ ChatWorkspaceFeature = Literal[
 WorkspaceFeature = Literal[
     "memory",
     "notebook",
-    "co-writer",
     "guide",
     "chat",
 ]
@@ -66,7 +63,6 @@ class PathService:
         "question": ("chat", "deep_question"),
         "research": ("chat", "deep_research"),
         "math_animator": ("chat", "math_animator"),
-        "co-writer": ("co-writer", None),
         "guide": ("guide", None),
         "run_code_workspace": ("chat", "_detached_code_execution"),
     }
@@ -132,9 +128,6 @@ class PathService:
             return False
 
         parts = relative.parts
-        if parts[:3] == ("workspace", "co-writer", "audio"):
-            return True
-
         if len(parts) >= 5 and parts[:3] == ("workspace", "chat", "deep_solve") and "artifacts" in parts[4:]:
             return True
 
@@ -185,7 +178,7 @@ class PathService:
     def _resolve_feature_root(self, feature: str) -> Path:
         if feature in {"chat", "deep_solve", "deep_question", "deep_research", "math_animator", "_detached_code_execution"}:
             return self.get_chat_feature_dir(feature)  # type: ignore[arg-type]
-        if feature in {"memory", "notebook", "co-writer", "guide"}:
+        if feature in {"memory", "notebook", "guide"}:
             return self.get_workspace_feature_dir(feature)  # type: ignore[arg-type]
         raise ValueError(f"Unknown workspace feature: {feature}")
 
@@ -254,18 +247,6 @@ class PathService:
     def get_research_reports_dir(self) -> Path:
         return self.get_research_dir() / "reports"
 
-    def get_co_writer_dir(self) -> Path:
-        return self.get_workspace_feature_dir("co-writer")
-
-    def get_co_writer_history_file(self) -> Path:
-        return self.get_co_writer_dir() / "history.json"
-
-    def get_co_writer_tool_calls_dir(self) -> Path:
-        return self.get_co_writer_dir() / "tool_calls"
-
-    def get_co_writer_audio_dir(self) -> Path:
-        return self.get_co_writer_dir() / "audio"
-
     def get_guide_dir(self) -> Path:
         return self.get_workspace_feature_dir("guide")
 
@@ -314,7 +295,7 @@ class PathService:
         self.ensure_memory_dir()
         self.ensure_notebook_dir()
         self.get_logs_dir().mkdir(parents=True, exist_ok=True)
-        for feature in ("co-writer", "guide"):
+        for feature in ("guide",):
             self.get_workspace_feature_dir(feature).mkdir(parents=True, exist_ok=True)
         for feature in (
             "chat",
@@ -325,8 +306,6 @@ class PathService:
             "_detached_code_execution",
         ):
             self.get_chat_feature_dir(feature).mkdir(parents=True, exist_ok=True)
-        self.get_co_writer_tool_calls_dir().mkdir(parents=True, exist_ok=True)
-        self.get_co_writer_audio_dir().mkdir(parents=True, exist_ok=True)
         self.get_research_reports_dir().mkdir(parents=True, exist_ok=True)
 
 

@@ -8,7 +8,6 @@ const APP_OUTPUT_DIR = path.resolve(".next");
 const ROUTE_BUDGETS_KB = {
   "/": 700,
   "/playground": 700,
-  "/co-writer": 700,
   "/guide": 700,
   "/knowledge": 450,
   "/memory": 450,

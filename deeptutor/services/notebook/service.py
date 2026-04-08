@@ -1,8 +1,8 @@
 """
 Shared notebook manager.
 
-This module keeps the notebook storage format unchanged so Web and CLI
-can operate on the same files under ``data/user``.
+This module keeps the notebook storage format stable for runtime consumers
+operating on shared files under ``data/user``.
 """
 
 from __future__ import annotations
@@ -25,9 +25,11 @@ class RecordType(str, Enum):
     SOLVE = "solve"
     QUESTION = "question"
     RESEARCH = "research"
-    CO_WRITER = "co_writer"
     CHAT = "chat"
     GUIDED_LEARNING = "guided_learning"
+
+
+REMOVED_RECORD_TYPES = {"co_writer"}
 
 
 class NotebookRecord(BaseModel):
@@ -100,9 +102,17 @@ class NotebookManager:
             return None
         try:
             with open(filepath, encoding="utf-8") as f:
-                return json.load(f)
+                notebook = json.load(f)
         except Exception:
             return None
+        records = notebook.get("records", [])
+        if isinstance(records, list):
+            notebook["records"] = [
+                record
+                for record in records
+                if str(record.get("type", "") or "") not in REMOVED_RECORD_TYPES
+            ]
+        return notebook
 
     def _save_notebook(self, notebook: dict) -> None:
         filepath = self._get_notebook_file(notebook["id"])
@@ -374,14 +384,7 @@ class NotebookManager:
         notebooks = self.list_notebooks()
 
         total_records = 0
-        type_counts = {
-            "solve": 0,
-            "question": 0,
-            "research": 0,
-            "co_writer": 0,
-            "chat": 0,
-            "guided_learning": 0,
-        }
+        type_counts = {"solve": 0, "question": 0, "research": 0, "chat": 0, "guided_learning": 0}
 
         for nb_info in notebooks:
             notebook = self._load_notebook(nb_info["id"])

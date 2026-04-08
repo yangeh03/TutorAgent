@@ -107,7 +107,6 @@ NEXT_PUBLIC_API_BASE=http://localhost:8001
 | Solve | `data/user/solve/solve_YYYYMMDD_HHMMSS/` |
 | Question | `data/user/question/question_YYYYMMDD_HHMMSS/` |
 | Research | `data/user/research/reports/` |
-| Co-Writer | `data/user/co-writer/` |
 | Notebook | `data/user/notebook/` |
 | Guide | `data/user/guide/session_{session_id}.json` |
 | Logs | `data/user/logs/` |
@@ -123,24 +122,6 @@ NEXT_PUBLIC_API_BASE=http://localhost:8001
 4. Upload PDF/TXT/MD documents
 5. System will process documents in background
 
-**CLI**
-```bash
-deeptutor kb create <kb_name> --doc <pdf_path>
-```
-
----
-
-## How to incrementally add documents to existing KB?
-
-**CLI (Recommended)**
-```bash
-deeptutor kb add <kb_name> --doc <new_document.pdf>
-```
-
-**Benefits**
-- Only processes new documents, saves time and API costs
-- Automatically merges with existing vector index
-- Preserves all existing data
 
 ---
 

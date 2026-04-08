@@ -16,7 +16,6 @@ import {
   Loader2,
   MessageSquare,
   NotebookPen,
-  PenLine,
   Plus,
   Search,
   Star,
@@ -535,8 +534,6 @@ export default function KnowledgePage() {
         return { label: t("Chat"), color: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300", icon: MessageSquare };
       case "guided_learning":
         return { label: t("Guided Learning"), color: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300", icon: GraduationCap };
-      case "co_writer":
-        return { label: t("Co-Writer"), color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", icon: PenLine };
       case "research":
         return { label: t("Research"), color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", icon: Search };
       default:

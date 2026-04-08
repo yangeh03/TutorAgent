@@ -10,7 +10,7 @@
 
 ## 🤖 Intelligent Agent Modules
 • **Problem Solving & Assessment**: Step-by-step problem solving and custom assessment generation.  
-• **Research & Learning**: Deep Research for topic exploration, Co-Writer drafting, and Guided Learning with visualization.
+• **Research & Learning**: Deep Research for topic exploration and Guided Learning with visualization.
 
 ## 🔧 Tool Integration Layer
 • **Information Retrieval**: RAG hybrid retrieval, real-time web search, and academic paper databases.  
@@ -44,7 +44,7 @@
 
 • **Authentic Exam Simulation**: Upload reference exams to generate practice questions that perfectly match the original style, format, and difficulty—giving you realistic preparation for the actual test.
 
-## 🔍 Deep Research & Co-Writer
+## 🔍 Deep Research
 
 • **Comprehensive Research & Literature Review**: Conduct in-depth topic exploration with systematic analysis. Identify patterns, connect related concepts across disciplines, and synthesize existing research findings.
 
@@ -104,28 +104,12 @@ Clone Exam Style for Authentic Practice
 
 <!-- Research & Creation -->
 
-### 🔍 Deep Research & Co-Writer
-
-<table>
-<tr>
-<td width="50%" align="center">
+### 🔍 Deep Research
 
 <img src="/deepresearch.gif" alt="Deep research with web and paper search demo" width="100%">
 
 **Deep Research**  
 Web and Paper Search with Literature Review
-
-</td>
-<td width="50%" align="center">
-
-<img src="/co-writer.gif" alt="Interactive idea generation demo" width="100%">
-
-**Co-Writer**  
-AI-assisted drafting, editing, and refinement
-
-</td>
-</tr>
-</table>
 
 <!-- Knowledge Infrastructure -->
 

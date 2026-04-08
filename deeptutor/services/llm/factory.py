@@ -257,15 +257,9 @@ async def complete(
         messages_value: list[dict[str, object]] | None,
     ) -> str:
         try:
-            if provider_mode == "oauth" and provider_name == "openai_codex":
-                raise LLMConfigError(
-                    "openai_codex requires OAuth login in CLI. "
-                    "Run `deeptutor provider login openai-codex` first."
-                )
             if provider_mode == "oauth":
                 raise LLMConfigError(
-                    f"{provider_name} requires OAuth session. "
-                    "Run `deeptutor provider login ...` first."
+                    f"Provider `{provider_name}` is not supported in this Web/API-only build."
                 )
             if provider_mode != "direct":
                 return await sdk_complete(
@@ -386,15 +380,9 @@ async def stream(
 
     for attempt in range(total_attempts):
         try:
-            if provider_mode == "oauth" and provider_name == "openai_codex":
-                raise LLMConfigError(
-                    "openai_codex requires OAuth login in CLI. "
-                    "Run `deeptutor provider login openai-codex` first."
-                )
             if provider_mode == "oauth":
                 raise LLMConfigError(
-                    f"{provider_name} requires OAuth session. "
-                    "Run `deeptutor provider login ...` first."
+                    f"Provider `{provider_name}` is not supported in this Web/API-only build."
                 )
 
             if provider_mode != "direct":

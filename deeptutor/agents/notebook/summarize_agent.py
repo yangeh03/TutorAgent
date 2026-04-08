@@ -139,10 +139,6 @@ class NotebookSummarizeAgent:
                 "zh": "一段完整聊天历史，重点提炼问题、结论与后续行动。",
                 "en": "A full chat transcript; focus on the question, conclusion, and next actions.",
             },
-            "co_writer": {
-                "zh": "一份写作草稿，重点提炼主题、结构、当前完成度与可继续扩展方向。",
-                "en": "A writing draft; focus on theme, structure, current completeness, and expansion paths.",
-            },
             "guided_learning": {
                 "zh": "一段引导式学习记录，重点提炼学习主题、知识点结构与阶段性产出。",
                 "en": "A guided learning record; focus on topic, knowledge structure, and partial/final output.",

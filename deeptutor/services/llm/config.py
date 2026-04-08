@@ -52,7 +52,7 @@ def _is_openai_compatible_binding(binding: str | None) -> bool:
     if canonical in {"custom", "azure_openai"}:
         return True
     spec = find_by_name(canonical)
-    return bool(spec and not spec.is_oauth)
+    return bool(spec)
 
 
 def _set_openai_env_vars(api_key: str | None, base_url: str | None, *, source: str) -> None:

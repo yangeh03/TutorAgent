@@ -1,4 +1,4 @@
-"""Shared notebook service used by CLI, Web, and runtime."""
+"""Shared notebook service used by Web and runtime adapters."""
 
 from .service import (
     Notebook,

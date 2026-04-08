@@ -85,16 +85,12 @@ def _load_runtime_deps():
 # ---------------------------------------------------------------------------
 
 PROFILE_COMMANDS: dict[str, list[str]] = {
-    "cli-core": ["requirements/cli.txt"],
-    "cli-rag": ["requirements/cli.txt"],
     "web-basic": ["requirements/server.txt"],
     "web-rag": ["requirements/server.txt"],
 }
 
 # Legacy aliases kept for backward compatibility (hidden from UI).
 PROFILE_ALIASES: dict[str, str] = {
-    "cli-rag-lite": "cli-rag",
-    "cli-rag-full": "cli-rag",
     "web-rag-lite": "web-rag",
     "web-rag-full": "web-rag",
 }
@@ -348,7 +344,7 @@ def _ensure_service(catalog: dict[str, Any], svc: str) -> tuple[dict[str, Any], 
 
 
 # ---------------------------------------------------------------------------
-# Configure a single service interactively (CLI path only)
+# Configure a single service interactively
 # ---------------------------------------------------------------------------
 
 def _configure_service(catalog: dict[str, Any], svc: str) -> None:
@@ -376,7 +372,7 @@ def _configure_service(catalog: dict[str, Any], svc: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Live connectivity test (CLI path only)
+# Live connectivity test
 # ---------------------------------------------------------------------------
 
 def _stream_test(svc: str, catalog: dict[str, Any]) -> bool:
@@ -642,114 +638,6 @@ def _run_web_tour() -> None:
 
 
 # ===================================================================
-# CLI path — full interactive configuration in the terminal
-# ===================================================================
-
-def _run_cli_tour() -> None:
-    total = 6
-
-    # -- Step 1: Profile ---------------------------------------------------
-    step(1, total, "Install profile")
-    profile = select(
-        "Choose a dependency profile",
-        [
-            ("cli-core", "cli-core", "Minimal CLI (~80 MB)"),
-            ("cli-rag", "cli-rag", "+ LlamaIndex RAG"),
-        ],
-    )
-    _save_cache({"step": 1, "mode": "cli", "profile": profile})
-
-    # -- Step 2: Ports -----------------------------------------------------
-    step(2, total, "Ports")
-    summary = get_env_store().as_summary()
-    ports = {
-        "backend": summary.backend_port,
-        "frontend": summary.frontend_port,
-    }
-    ports["backend"] = int(text_input("Backend port", str(ports["backend"])))
-    print()
-    _save_cache({"step": 2, "mode": "cli", "profile": profile, "ports": ports})
-
-    # -- Step 3: Install dependencies --------------------------------------
-    catalog = get_model_catalog_service().load()
-
-    step(3, total, "Install dependencies")
-    if confirm("Install dependencies now?", default=True):
-        for cmd, cwd in _install_commands(profile, catalog):
-            _run_cmd(cmd, cwd)
-        log_success("Dependencies installed.")
-    else:
-        log_warn("Skipped. You can rerun the tour later.")
-    print()
-    _save_cache({"step": 3, "mode": "cli", "profile": profile, "ports": ports})
-
-    # -- Step 4: Configure providers ---------------------------------------
-    step(4, total, "Configure providers")
-    _configure_service(catalog, "llm")
-    _configure_service(catalog, "embedding")
-
-    search_enabled = False
-    if confirm("Configure a search provider?", default=False):
-        _configure_service(catalog, "search")
-        search_enabled = True
-
-    _save_cache({"step": 4, "mode": "cli", "profile": profile, "ports": ports})
-
-    # -- Step 5: Live diagnostics ------------------------------------------
-    step(5, total, "Verify connections")
-    llm_ok = _stream_test("llm", catalog)
-    print()
-    emb_ok = _stream_test("embedding", catalog)
-    print()
-
-    if search_enabled:
-        _stream_test("search", catalog)
-        print()
-
-    if not llm_ok or not emb_ok:
-        log_error("LLM and Embedding must both pass before saving.")
-        raise SystemExit(1)
-
-    # -- Step 6: Review & apply --------------------------------------------
-    step(6, total, "Review & apply")
-
-    llm_p = get_model_catalog_service().get_active_profile(catalog, "llm")
-    llm_m = get_model_catalog_service().get_active_model(catalog, "llm")
-    emb_p = get_model_catalog_service().get_active_profile(catalog, "embedding")
-    emb_m = get_model_catalog_service().get_active_model(catalog, "embedding")
-    search_p = get_model_catalog_service().get_active_profile(catalog, "search")
-
-    log_info(f"Profile   {bold(profile)}")
-    log_info(f"Backend   {bold(str(ports['backend']))}")
-    log_info(f"LLM       {bold((llm_p or {}).get('name', '?'))}  {dim((llm_m or {}).get('model', '?'))}")
-    log_info(f"Embedding {bold((emb_p or {}).get('name', '?'))}  {dim((emb_m or {}).get('model', '?'))}")
-    if search_enabled:
-        log_info(f"Search    {bold((search_p or {}).get('name', '?'))}")
-    else:
-        log_info(f"Search    {dim('skipped')}")
-    print()
-
-    if not confirm("Write configuration?", default=True):
-        log_warn("No files changed.")
-        _cleanup_cache()
-        raise SystemExit(0)
-
-    get_model_catalog_service().save(catalog)
-    get_env_store().write(_build_env(ports, catalog))
-    log_success("Saved model_catalog.json and .env")
-
-    _cleanup_cache()
-
-    print()
-    log_success("Tour complete. Next commands:")
-    print()
-    print(f"  {dim('$')} deeptutor chat")
-    print(f"  {dim('$')} deeptutor kb list")
-    print(f"  {dim('$')} deeptutor serve --port {ports['backend']}")
-    print()
-
-
-# ===================================================================
 # Entry
 # ===================================================================
 
@@ -766,21 +654,7 @@ def run_tour() -> None:
         log_warn("A previous tour session was interrupted.")
         if not confirm("Resume where you left off?", default=True):
             _cleanup_cache()
-            cache = None
-
-    step(1, "?", "Choose mode")
-    mode = select(
-        "How would you like to use DeepTutor?",
-        [
-            ("web", "web", "Browser UI — configure in Settings page (recommended)"),
-            ("cli", "cli", "Terminal only — configure interactively here"),
-        ],
-    )
-
-    if mode == "web":
-        _run_web_tour()
-    else:
-        _run_cli_tour()
+    _run_web_tour()
 
 
 def main() -> None:

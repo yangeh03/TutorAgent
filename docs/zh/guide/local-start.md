@@ -20,9 +20,9 @@ pip install ".[math-animator]"   # 可选
 python scripts/start_tour.py
 ```
 
-引导会直接在终端里运行，并先询问你想使用 `Web` 还是 `CLI`。
+引导会直接在终端里运行，并引导完成 Web/API 的配置流程。
 
-两种模式最终都会写入项目根目录 `.env`。运行行为配置只从下面这些文件读取：
+流程最终会写入项目根目录 `.env`。运行行为配置只从下面这些文件读取：
 
 - `data/user/settings/main.yaml`
 - `data/user/settings/agents.yaml`
@@ -43,16 +43,6 @@ python scripts/start_web.py
 ```
 
 这个启动器会读取项目根目录 `.env`，启动 FastAPI 后端，并自动把 `NEXT_PUBLIC_API_BASE` 注入前端进程。
-
-## 仅使用 CLI
-
-如果你只想使用终端工作流，在 `start_tour.py` 里选择 `CLI` 即可。之后常用命令仍然是：
-
-```bash
-deeptutor chat
-deeptutor kb list
-deeptutor serve --port 8001
-```
 
 ## 说明
 

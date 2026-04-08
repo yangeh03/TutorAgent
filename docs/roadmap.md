@@ -15,7 +15,7 @@ Our vision for DeepTutor's future development.
 
 ## 🚀 Planned Features
 
-- [ ] **Deepcoding from Research Drafts** — Transform research and Co-Writer outputs into working prototypes
+- [ ] **Deepcoding from Research Drafts** — Transform research outputs into working prototypes
 - [ ] **Personalized Memory** — Adapt tutoring style based on user learning history
 - [ ] **Additional RAG Backends** — ChromaDB, Pinecone integration
 - [ ] **More Embedding Adapters** — Voyage AI, Mixedbread, local transformers

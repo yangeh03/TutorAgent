@@ -29,7 +29,7 @@ SETTINGS_FILE = _path_service.get_settings_file("interface")
 
 DEFAULT_SIDEBAR_NAV_ORDER = {
     "start": ["/", "/history", "/knowledge", "/notebook"],
-    "learnResearch": ["/question", "/solver", "/guide", "/research", "/co_writer"],
+    "learnResearch": ["/question", "/solver", "/guide", "/research"],
 }
 
 DEFAULT_UI_SETTINGS = {
@@ -84,7 +84,16 @@ def load_ui_settings() -> dict[str, Any]:
         try:
             with open(SETTINGS_FILE, encoding="utf-8") as handle:
                 saved = json.load(handle)
-                return {**DEFAULT_UI_SETTINGS, **saved}
+                merged = {**DEFAULT_UI_SETTINGS, **saved}
+                nav_order = dict(merged.get("sidebar_nav_order") or DEFAULT_SIDEBAR_NAV_ORDER)
+                learn_research = [
+                    item
+                    for item in nav_order.get("learnResearch", DEFAULT_SIDEBAR_NAV_ORDER["learnResearch"])
+                    if item != "/co_writer"
+                ]
+                nav_order["learnResearch"] = learn_research or DEFAULT_SIDEBAR_NAV_ORDER["learnResearch"]
+                merged["sidebar_nav_order"] = nav_order
+                return merged
         except Exception:
             pass
     return DEFAULT_UI_SETTINGS.copy()
