@@ -32,6 +32,7 @@ type PagePayload = {
 export function useGuideSession() {
   const isHydrated = useRef(false);
   const pollingRef = useRef<number | null>(null);
+  const hasManualSelectionRef = useRef(false);
 
   const [sessionState, setSessionState] = useState<SessionState>(
     INITIAL_SESSION_STATE,
@@ -59,6 +60,7 @@ export function useGuideSession() {
   const resetGuideState = useCallback(
     (message?: string) => {
       stopPolling();
+      hasManualSelectionRef.current = false;
       clearPersistedGuideState();
       setSessionState(INITIAL_SESSION_STATE);
       setIsLoading(false);
@@ -167,15 +169,27 @@ export function useGuideSession() {
       };
 
       let currentIndex = prev.current_index;
-      // Only accept current_index from server/payload if user hasn't navigated yet.
-      // This prevents polling from overwriting the user's tab selection.
-      if (typeof payload.current_index === "number" && prev.current_index < 0) {
+      // Only accept current_index from server/payload before the user manually picks a page.
+      if (
+        typeof payload.current_index === "number" &&
+        prev.current_index < 0 &&
+        !hasManualSelectionRef.current
+      ) {
         currentIndex = payload.current_index;
       }
 
-      if (currentIndex < 0) {
+      const selectedPageReady =
+        currentIndex >= 0 &&
+        mergedStatuses[currentIndex] === "ready" &&
+        Boolean(mergedHtmlPages[currentIndex]);
+
+      // Before the user manually switches tabs, automatically reveal the first
+      // ready page instead of staying stuck on a slower selected page.
+      if (!hasManualSelectionRef.current && !selectedPageReady) {
         const firstReadyKey = Object.keys(mergedStatuses).find(
-          (key) => mergedStatuses[Number(key)] === "ready",
+          (key) =>
+            mergedStatuses[Number(key)] === "ready" &&
+            Boolean(mergedHtmlPages[Number(key)]),
         );
         if (firstReadyKey !== undefined) {
           currentIndex = Number(firstReadyKey);
@@ -413,6 +427,7 @@ export function useGuideSession() {
         setLoadingMessage("");
 
         if (res.ok && data.success) {
+          hasManualSelectionRef.current = false;
           const initialStatuses: Record<number, PageStatus> = {};
           (data.knowledge_points || []).forEach(
             (_kp: KnowledgePoint, idx: number) => {
@@ -497,6 +512,7 @@ export function useGuideSession() {
       setLoadingMessage("");
 
       if (data.success) {
+        hasManualSelectionRef.current = false;
         setSessionState((prev) => ({
           ...prev,
           current_index: typeof data.current_index === "number" ? data.current_index : 0,
@@ -547,6 +563,7 @@ export function useGuideSession() {
   const navigateTo = useCallback(
     async (knowledgeIndex: number) => {
       if (!sessionState.session_id) return;
+      hasManualSelectionRef.current = true;
 
       setSessionState((prev) => ({
         ...prev,
@@ -895,6 +912,7 @@ export function useGuideSession() {
   const loadSession = useCallback(
     async (sessionId: string) => {
       stopPolling();
+      hasManualSelectionRef.current = false;
       setIsLoading(true);
       setLoadingMessage("Loading session...");
 
