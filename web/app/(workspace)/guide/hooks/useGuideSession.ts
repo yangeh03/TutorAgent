@@ -39,6 +39,7 @@ export function useGuideSession() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [requestError, setRequestError] = useState("");
   const hasUnresolvedPages = Object.values(sessionState.page_statuses).some(
     (status) => status === "pending" || status === "generating",
   );
@@ -62,6 +63,7 @@ export function useGuideSession() {
       setSessionState(INITIAL_SESSION_STATE);
       setIsLoading(false);
       setLoadingMessage("");
+      setRequestError("");
       setChatMessages(
         message
           ? [
@@ -382,6 +384,7 @@ export function useGuideSession() {
       stopPolling();
       setIsLoading(true);
       setLoadingMessage("Designing your guided learning plan...");
+      setRequestError("");
       const loadingId = addLoadingMessage(
         "Designing your guided learning plan...",
       );
@@ -398,12 +401,18 @@ export function useGuideSession() {
           }),
         });
         const data = await res.json();
+        const errorMessage =
+          typeof data?.error === "string"
+            ? data.error
+            : typeof data?.detail === "string"
+              ? data.detail
+              : "Failed to create session";
 
         removeLoadingMessage(loadingId);
         setIsLoading(false);
         setLoadingMessage("");
 
-        if (data.success) {
+        if (res.ok && data.success) {
           const initialStatuses: Record<number, PageStatus> = {};
           (data.knowledge_points || []).forEach(
             (_kp: KnowledgePoint, idx: number) => {
@@ -433,10 +442,12 @@ export function useGuideSession() {
               timestamp: Date.now(),
             },
           ]);
+          setRequestError("");
         } else {
+          setRequestError(errorMessage);
           addChatMessage(
             "system",
-            `❌ Failed to create session: ${data.error}`,
+            `❌ Failed to create session: ${errorMessage}`,
             `error-${Date.now()}`,
           );
         }
@@ -445,6 +456,7 @@ export function useGuideSession() {
         setIsLoading(false);
         setLoadingMessage("");
         console.error("Failed to create session:", err);
+        setRequestError("Failed to create session, please try again later");
         addChatMessage(
           "system",
           "❌ Failed to create session, please try again later",
@@ -1002,6 +1014,7 @@ export function useGuideSession() {
     chatMessages,
     isLoading,
     loadingMessage,
+    requestError,
     canStart,
     isCompleted,
     readyCount,

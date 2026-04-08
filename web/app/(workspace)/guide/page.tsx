@@ -34,6 +34,7 @@ export default function GuidePage() {
     chatMessages,
     isLoading,
     loadingMessage,
+    requestError,
     canStart,
     isCompleted,
     readyCount,
@@ -239,6 +240,12 @@ export default function GuidePage() {
                 )}
                 {t("Generate learning plan")}
               </button>
+
+              {requestError ? (
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+                  {requestError}
+                </div>
+              ) : null}
             </div>
           </div>
         ) : (
@@ -366,6 +373,41 @@ export default function GuidePage() {
             <div className="flex-1 min-h-0 flex flex-col">
               {showingSummary && sessionState.summary ? (
                 <CompletionSummary summary={sessionState.summary} />
+              ) : sessionState.status === "initialized" ? (
+                <div className="h-full bg-white dark:bg-slate-800 rounded-b-2xl border border-t-0 border-slate-200 dark:border-slate-700 flex flex-col justify-center p-8">
+                  <div className="mx-auto w-full max-w-3xl rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-cyan-50 p-8 shadow-sm dark:border-indigo-900/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                      <Sparkles className="h-4 w-4" />
+                      {t("Learning plan ready")}
+                    </div>
+                    <h3 className="mt-4 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                      {sessionState.topic || t("Your guided learning session")}
+                    </h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      {t(
+                        "Your study plan has been generated. Click Start in the top bar to begin generating the interactive learning pages.",
+                      )}
+                    </p>
+
+                    <div className="mt-6 grid gap-3">
+                      {sessionState.knowledge_points.map((point, index) => (
+                        <div
+                          key={`plan-preview-${index}`}
+                          className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-left shadow-sm dark:border-slate-700 dark:bg-slate-900/70"
+                        >
+                          <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                            {index + 1}. {point.knowledge_title}
+                          </div>
+                          {point.knowledge_summary ? (
+                            <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                              {point.knowledge_summary}
+                            </p>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               ) : sessionState.status === "learning" || (isCompleted && !showingSummary) ? (
                 <HTMLViewer
                   html={

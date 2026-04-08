@@ -27,6 +27,7 @@ class SummaryAgent(BaseAgent):
             base_url=base_url,
             api_version=api_version,
             language=language,
+            binding=binding,
         )
 
     def _format_knowledge_points(self, points: list[dict[str, Any]]) -> str:

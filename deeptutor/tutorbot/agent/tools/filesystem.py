@@ -132,15 +132,27 @@ class WriteFileTool(_FsTool):
 
     @property
     def description(self) -> str:
-        return "Write content to a file at the given path. Creates parent directories if needed."
+        return (
+            "Write the full contents of a file. "
+            "Requires both a non-empty 'path' and the complete non-empty 'content'. "
+            "Creates parent directories if needed."
+        )
 
     @property
     def parameters(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "path": {"type": "string", "description": "The file path to write to"},
-                "content": {"type": "string", "description": "The content to write"},
+                "path": {
+                    "type": "string",
+                    "description": "The file path to write to, for example 'notes/plan.md'.",
+                    "minLength": 1,
+                },
+                "content": {
+                    "type": "string",
+                    "description": "The complete file content to write. Must not be empty.",
+                    "minLength": 1,
+                },
             },
             "required": ["path", "content"],
         }

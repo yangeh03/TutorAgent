@@ -28,6 +28,7 @@ class InteractiveAgent(BaseAgent):
             base_url=base_url,
             api_version=api_version,
             language=language,
+            binding=binding,
         )
 
     def _extract_html(self, response: str) -> str:

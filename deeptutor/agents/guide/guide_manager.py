@@ -69,6 +69,8 @@ class GuidedSession:
 class GuideManager:
     """Guided learning manager"""
 
+    PAGE_GENERATION_TIMEOUT_SECONDS = 180
+
     def __init__(
         self,
         api_key: str,
@@ -244,7 +246,32 @@ class GuideManager:
         session.page_errors[key] = ""
         self._save_session(session)
 
-        result = await self.interactive_agent.process(knowledge=knowledge)
+        self.logger.info(
+            f"Guide page generation started: session={session_id}, index={knowledge_index}"
+        )
+
+        try:
+            result = await asyncio.wait_for(
+                self.interactive_agent.process(knowledge=knowledge),
+                timeout=self.PAGE_GENERATION_TIMEOUT_SECONDS,
+            )
+        except TimeoutError:
+            self.logger.warning(
+                f"Guide page generation timed out after "
+                f"{self.PAGE_GENERATION_TIMEOUT_SECONDS}s: session={session_id}, "
+                f"index={knowledge_index}"
+            )
+            result = {
+                "success": True,
+                "html": self.interactive_agent._generate_fallback_html(knowledge),
+                "is_fallback": True,
+                "error": (
+                    "Interactive page generation timed out. "
+                    "A fallback page was used instead."
+                ),
+                "message": "Timed out, used fallback template",
+            }
+
         session = self._load_session(session_id)
         if not session:
             return {"success": False, "error": "Session does not exist"}
@@ -256,12 +283,20 @@ class GuideManager:
             session.page_statuses[key] = "ready"
             session.page_errors[key] = result.get("error", "")
             self._save_session(session)
+            self.logger.info(
+                f"Guide page generation finished: session={session_id}, "
+                f"index={knowledge_index}, fallback={bool(result.get('is_fallback'))}"
+            )
             return result
 
         retryable = bool(result.get("retryable"))
         session.page_statuses[key] = "pending" if retryable else "failed"
         session.page_errors[key] = result.get("error", "Failed to generate page")
         self._save_session(session)
+        self.logger.warning(
+            f"Guide page generation failed: session={session_id}, index={knowledge_index}, "
+            f"retryable={retryable}, error={session.page_errors[key]}"
+        )
         return result
 
     async def _generate_all_pages_background(
@@ -327,10 +362,22 @@ class GuideManager:
         if self._has_active_generation_task(session_id):
             return
 
+        self.logger.info(
+            f"Guide background generation scheduled: session={session_id}, indices={indices}"
+        )
         task = asyncio.create_task(self._generate_all_pages_background(session_id, indices))
         self._generation_tasks[session_id] = task
 
         def _cleanup(_task: asyncio.Task[None]):
+            exc = None
+            try:
+                exc = _task.exception()
+            except asyncio.CancelledError:
+                exc = None
+            if exc:
+                self.logger.error(
+                    f"Guide background generation crashed: session={session_id}, error={exc}"
+                )
             self._generation_tasks.pop(session_id, None)
 
         task.add_done_callback(_cleanup)
@@ -362,6 +409,9 @@ class GuideManager:
         design_result = await self.design_agent.process(user_input=user_input)
 
         if not design_result.get("success"):
+            self.logger.warning(
+                f"Guide plan design failed: {design_result.get('error', 'unknown error')}"
+            )
             return {
                 "success": False,
                 "error": design_result.get("error", "Failed to design learning plan"),
@@ -371,6 +421,7 @@ class GuideManager:
         knowledge_points = design_result.get("knowledge_points", [])
 
         if not knowledge_points:
+            self.logger.warning("Guide plan design returned no knowledge points")
             return {
                 "success": False,
                 "error": "No knowledge points identified from user input",
@@ -664,6 +715,19 @@ class GuideManager:
             return None
 
         self._initialize_page_statuses(session)
+        if session.status == "learning" and not self._has_active_generation_task(session_id):
+            stale_generating = False
+            for key, value in list(session.page_statuses.items()):
+                if value == "generating":
+                    session.page_statuses[key] = "pending"
+                    stale_generating = True
+            if stale_generating:
+                self.logger.warning(
+                    f"Guide session had stale generating pages; resetting to pending: "
+                    f"session={session_id}"
+                )
+                self._save_session(session)
+
         if session.status == "learning" and not self._has_active_generation_task(session_id):
             pending_indices = [
                 index
