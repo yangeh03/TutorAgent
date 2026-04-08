@@ -2,7 +2,7 @@
 
 <img src="assets/logo-ver2.png" alt="DeepTutor" width="140" style="border-radius: 15px;">
 
-# DeepTutor: Agent-Native Personalized Tutoring
+# DeepTutor：智能体原生的个性化辅导
 
 <a href="https://trendshift.io/repositories/17099" target="_blank"><img src="https://trendshift.io/api/badge/repositories/17099" alt="HKUDS%2FDeepTutor | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
@@ -16,90 +16,91 @@
 [![Feishu](https://img.shields.io/badge/Feishu-Group-00D4AA?style=flat-square&logo=feishu&logoColor=white)](./Communication.md)
 [![WeChat](https://img.shields.io/badge/WeChat-Group-07C160?style=flat-square&logo=wechat&logoColor=white)](https://github.com/HKUDS/DeepTutor/issues/78)
 
-[Features](#-key-features) · [Get Started](#-get-started) · [Explore](#-explore-deeptutor) · [TutorBot](#-tutorbot--persistent-autonomous-ai-tutors) · [CLI](#%EF%B8%8F-deeptutor-cli--agent-native-interface) · [Community](#-community--ecosystem)
-
-[🇨🇳 中文](assets/README/README_CN.md) · [🇯🇵 日本語](assets/README/README_JA.md) · [🇪🇸 Español](assets/README/README_ES.md) · [🇫🇷 Français](assets/README/README_FR.md) · [🇸🇦 العربية](assets/README/README_AR.md) · [🇷🇺 Русский](assets/README/README_RU.md) · [🇮🇳 हिन्दी](assets/README/README_HI.md) · [🇵🇹 Português](assets/README/README_PT.md)
+[核心亮点](#key-features) · [快速开始](#get-started) · [探索 DeepTutor](#explore-deeptutor) · [TutorBot](#tutorbot) · [CLI](#deeptutor-cli-guide) · [路线图](#roadmap) · [社区](#community)
 
 </div>
 
 ---
-### 📰 News
+### 📰 动态
 
-> **[2026.4.4]** Long time no see! ✨ DeepTutor v1.0.0 is finally here — an agent-native evolution featuring a ground-up architecture rewrite, TutorBot, and flexible mode switching under the Apache-2.0 license. A new chapter begins, and our story continues! 
+> **[2026.4.4]** 好久不见！DeepTutor v1.0.0 终于到来，在 Apache-2.0 许可下完成智能体原生演进：自底向上架构重写、TutorBot、灵活模式切换。新篇章开启，故事继续。
 
-> **[2026.2.6]** 🚀 We've reached 10k stars in just 39 days! A huge thank you to our incredible community for the support! 
+> **[2026.2.6]** 仅用 39 天即突破 10k star，感谢社区的大力支持。
 
-> **[2026.1.1]** Happy New Year! Join our [Discord](https://discord.gg/eRsjPgMU4t), [WeChat](https://github.com/HKUDS/DeepTutor/issues/78), or [Discussions](https://github.com/HKUDS/DeepTutor/discussions) — let's shape the future of DeepTutor together!
+> **[2026.1.1]** 新年快乐！欢迎加入 [Discord](https://discord.gg/eRsjPgMU4t)、[微信](https://github.com/HKUDS/DeepTutor/issues/78) 或 [Discussions](https://github.com/HKUDS/DeepTutor/discussions)，一起塑造 DeepTutor 的未来。
 
-> **[2025.12.29]** DeepTutor is officially released!
+> **[2025.12.29]** DeepTutor 正式发布。
 
-### 📦 Releases
+### 📦 版本发布
 
-> **[2026.4.8]** [v1.0.0-beta.3](https://github.com/HKUDS/DeepTutor/releases/tag/v1.0.0-beta.3) — Remove litellm dependency with native OpenAI/Anthropic SDK providers, Windows Math Animator compatibility, robust JSON parsing for LLM outputs, Guided Learning KaTeX & navigation fixes, and full i18n coverage for Chinses.
+> **[2026.4.8]** [v1.0.0-beta.3](https://github.com/HKUDS/DeepTutor/releases/tag/v1.0.0-beta.3) — 移除 `litellm` 依赖，改用原生 OpenAI/Anthropic SDK Provider，增强 Windows Math Animator 兼容性、LLM 输出 JSON 解析鲁棒性，修复引导式学习 KaTeX 与导航问题，并补齐全站中文国际化。
 
-> **[2026.4.7]** [v1.0.0-beta.2](https://github.com/HKUDS/DeepTutor/releases/tag/v1.0.0-beta.2) — Runtime cache invalidation for hot settings reload, MinerU nested output support, mimic WebSocket fix, Python 3.11+ minimum, and CI improvements.
+> **[2026.4.7]** [v1.0.0-beta.2](https://github.com/HKUDS/DeepTutor/releases/tag/v1.0.0-beta.2) — 运行时缓存失效以支持热更新设置、MinerU 嵌套输出、mimic WebSocket 修复、最低 Python 3.11+，以及 CI 改进。
 
-> **[2026.4.4]** [v1.0.0-beta.1](https://github.com/HKUDS/DeepTutor/releases/tag/v1.0.0-beta.1) — Agent-native architecture rewrite (DeepTutor 2.0) with two-layer plugin model (Tools + Capabilities), CLI & SDK entry points, TutorBot multi-channel bot agent, Co-Writer, Guided Learning, and persistent memory.
+> **[2026.4.4]** [v1.0.0-beta.1](https://github.com/HKUDS/DeepTutor/releases/tag/v1.0.0-beta.1) — 智能体原生架构重写（DeepTutor 2.0）：双层插件模型（Tools + Capabilities）、CLI 与 SDK 入口、TutorBot 多渠道机器人、Co-Writer、引导式学习与持久记忆。
 
 <details>
-<summary><b>Past releases</b></summary>
+<summary><b>历史版本</b></summary>
 
-> **[2026.1.23]** [v0.6.0](https://github.com/HKUDS/DeepTutor/releases/tag/v0.6.0) — Session persistence, incremental document upload, flexible RAG pipeline import, and full Chinese localization.
+> **[2026.1.23]** [v0.6.0](https://github.com/HKUDS/DeepTutor/releases/tag/v0.6.0) — 会话持久化、增量文档上传、灵活 RAG 流水线导入与完整中文本地化。
 
-> **[2026.1.18]** [v0.5.2](https://github.com/HKUDS/DeepTutor/releases/tag/v0.5.2) — Docling support for RAG-Anything, logging system optimization, and bug fixes.
+> **[2026.1.18]** [v0.5.2](https://github.com/HKUDS/DeepTutor/releases/tag/v0.5.2) — RAG-Anything 支持 Docling、日志优化与问题修复。
 
-> **[2026.1.15]** [v0.5.0](https://github.com/HKUDS/DeepTutor/releases/tag/v0.5.0) — Unified service configuration, RAG pipeline selection per knowledge base, question generation overhaul, and sidebar customization.
+> **[2026.1.15]** [v0.5.0](https://github.com/HKUDS/DeepTutor/releases/tag/v0.5.0) — 统一服务配置、按知识库选择 RAG 流水线、出题改版与侧栏定制。
 
-> **[2026.1.9]** [v0.4.0](https://github.com/HKUDS/DeepTutor/releases/tag/v0.4.0) — Multi-provider LLM & embedding support, new home page, RAG module decoupling, and environment variable refactor.
+> **[2026.1.9]** [v0.4.0](https://github.com/HKUDS/DeepTutor/releases/tag/v0.4.0) — 多提供商 LLM 与嵌入、新首页、RAG 解耦与环境变量重构。
 
-> **[2026.1.5]** [v0.3.0](https://github.com/HKUDS/DeepTutor/releases/tag/v0.3.0) — Unified PromptManager architecture, GitHub Actions CI/CD, and pre-built Docker images on GHCR.
+> **[2026.1.5]** [v0.3.0](https://github.com/HKUDS/DeepTutor/releases/tag/v0.3.0) — 统一 PromptManager、GitHub Actions CI/CD 与 GHCR 预构建镜像。
 
-> **[2026.1.2]** [v0.2.0](https://github.com/HKUDS/DeepTutor/releases/tag/v0.2.0) — Docker deployment, Next.js 16 & React 19 upgrade, WebSocket security hardening, and critical vulnerability fixes.
+> **[2026.1.2]** [v0.2.0](https://github.com/HKUDS/DeepTutor/releases/tag/v0.2.0) — Docker 部署、Next.js 16 与 React 19、WebSocket 加固与关键漏洞修复。
 
 </details>
 
-## ✨ Key Features
+<a id="key-features"></a>
+## ✨ 核心亮点
 
-- **Unified Chat Workspace** — Five modes, one thread. Chat, Deep Solve, Quiz Generation, Deep Research, and Math Animator share the same context — start a conversation, escalate to multi-agent problem solving, generate quizzes, then deep-dive into research, all without losing a single message.
-- **Personal TutorBots** — Not chatbots — autonomous tutors. Each TutorBot lives in its own workspace with its own memory, personality, and skill set. They set reminders, learn new abilities, and evolve as you grow. Powered by [nanobot](https://github.com/HKUDS/nanobot).
-- **AI Co-Writer** — A Markdown editor where AI is a first-class collaborator. Select text, rewrite, expand, or summarize — drawing from your knowledge base and the web. Every piece feeds back into your learning ecosystem.
-- **Guided Learning** — Turn your materials into structured, visual learning journeys. DeepTutor designs multi-step plans, generates interactive pages for each knowledge point, and lets you discuss alongside each step.
-- **Knowledge Hub** — Upload PDFs, Markdown, and text files to build RAG-ready knowledge bases. Organize insights across sessions in color-coded notebooks. Your documents don't just sit there — they actively power every conversation.
-- **Persistent Memory** — DeepTutor builds a living profile of you: what you've studied, how you learn, and where you're heading. Shared across all features and TutorBots, it gets sharper with every interaction.
-- **Agent-Native CLI** — Every capability, knowledge base, session, and TutorBot is one command away. Rich terminal output for humans, structured JSON for AI agents and pipelines. Hand DeepTutor a [`SKILL.md`](SKILL.md) and your agents can operate it autonomously.
+- **统一聊天工作区** — 五种模式，同一条对话线。聊天、深度解题、测验生成、深度研究与数学动画共享上下文：从闲聊到多智能体解题、出题、再深入调研，消息不丢。
+- **个人 TutorBot** — 不是聊天机器人，而是自主导师。每个 TutorBot 拥有独立工作区、记忆、人格与技能；可提醒、可学新能力、随你成长。由 [nanobot](https://github.com/HKUDS/nanobot) 驱动。
+- **AI Co-Writer** — Markdown 编辑器中 AI 是一等协作者。划选文本即可改写、扩写或缩写，可结合知识库与网络；内容可沉淀到笔记本，反哺学习闭环。
+- **引导式学习** — 把资料变成结构化、可视化的学习路径：多步计划、每步交互页面、步步可讨论。
+- **知识中枢** — 上传 PDF、Markdown、纯文本构建 RAG 知识库；用彩色笔记本跨会话整理洞见。文档主动参与每次对话。
+- **持久记忆** — 持续勾勒你的学习画像：学过什么、如何学习、目标何在。全功能与 TutorBot 共享，越用越准。
+- **智能体原生 CLI** — 能力、知识库、会话、TutorBot 一条命令可达；终端 Rich 输出给人看，JSON 给智能体与流水线。将根目录 [`SKILL.md`](SKILL.md) 交给智能体即可自主操作。
 
 ---
 
-## 🚀 Get Started
+<a id="get-started"></a>
+## 🚀 快速开始
 
-### Option A — Setup Tour (Recommended)
+### 方案 A — 引导式安装（推荐）
 
-A **single interactive script** that walks you through everything: dependency installation, environment configuration, live connection testing, and launch. No manual `.env` editing needed.
+一条交互脚本完成依赖安装、环境配置、连通性检测与启动，无需手改 `.env`。
 
 ```bash
 git clone https://github.com/HKUDS/DeepTutor.git
 cd DeepTutor
 
-# Create a Python environment
+# 创建 Python 环境
 conda create -n deeptutor python=3.11 && conda activate deeptutor
-# Or: python -m venv .venv && source .venv/bin/activate
+# 或：python -m venv .venv && source .venv/bin/activate
 
-# Launch the guided tour
+# 启动引导
 python scripts/start_tour.py
 ```
 
-The tour asks how you'd like to use DeepTutor:
+向导会询问使用方式：
 
-- **Web mode** (recommended) — Picks a dependency profile, installs everything (pip + npm), then spins up a temporary server and opens the **Settings** page in your browser. A four-step guided tour walks you through LLM, Embedding, and Search provider setup with live connection testing. Once complete, DeepTutor restarts automatically with your configuration.
-- **CLI mode** — A fully interactive terminal flow: choose a dependency profile, install dependencies, configure providers, verify connections, and apply — all without leaving the shell.
+- **Web 模式**（推荐）— 选择依赖配置、安装 pip + npm、拉起临时服务并在浏览器打开设置页；四步引导配置 LLM、嵌入与搜索并现场测通；完成后自动按配置重启。
+- **CLI 模式** — 全终端交互：选配置、装依赖、配提供商、验证连接并应用，无需离开 shell。
 
-Either way, you end up with a running DeepTutor at [http://localhost:3782](http://localhost:3782).
+完成后访问 [http://localhost:3782](http://localhost:3782)。
 
-### Option B — Manual Local Install
+<a id="option-b-manual"></a>
+### 方案 B — 本地手动安装
 
-If you prefer full control, install and configure everything yourself.
+若希望完全自控，可自行安装与配置。
 
-**1. Install dependencies**
+**1. 安装依赖**
 
 ```bash
 git clone https://github.com/HKUDS/DeepTutor.git
@@ -108,26 +109,26 @@ cd DeepTutor
 conda create -n deeptutor python=3.11 && conda activate deeptutor
 pip install -e ".[server]"
 
-# Frontend
+# 前端
 cd web && npm install && cd ..
 ```
 
-**2. Configure environment**
+**2. 配置环境**
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and fill in at least the required fields:
+编辑 `.env`，至少填写必填项：
 
 ```dotenv
-# LLM (Required)
+# LLM（必填）
 LLM_BINDING=openai
 LLM_MODEL=gpt-4o-mini
 LLM_API_KEY=sk-xxx
 LLM_HOST=https://api.openai.com/v1
 
-# Embedding (Required for Knowledge Base)
+# 嵌入（知识库必填）
 EMBEDDING_BINDING=openai
 EMBEDDING_MODEL=text-embedding-3-large
 EMBEDDING_API_KEY=sk-xxx
@@ -136,9 +137,9 @@ EMBEDDING_DIMENSION=3072
 ```
 
 <details>
-<summary><b>Supported LLM Providers</b></summary>
+<summary><b>支持的 LLM 提供商</b></summary>
 
-| Provider | Binding | Default Base URL |
+| 提供商 | Binding | 默认 Base URL |
 |:--|:--|:--|
 | AiHubMix | `aihubmix` | `https://aihubmix.com/v1` |
 | Anthropic | `anthropic` | `https://api.anthropic.com/v1` |
@@ -171,57 +172,57 @@ EMBEDDING_DIMENSION=3072
 </details>
 
 <details>
-<summary><b>Supported Embedding Providers</b></summary>
+<summary><b>支持的嵌入（Embedding）提供商</b></summary>
 
-Embedding uses the same provider list as LLM. Common choices:
+嵌入使用与 LLM 相同的提供商列表。常见选择：
 
-| Provider | Binding | Model Example |
+| 提供商 | Binding | 模型示例 |
 |:--|:--|:--|
 | OpenAI | `openai` | `text-embedding-3-large` |
 | DashScope | `dashscope` | `text-embedding-v3` |
 | Ollama | `ollama` | `nomic-embed-text` |
 | SiliconFlow | `siliconflow` | `BAAI/bge-m3` |
-| vLLM | `vllm` | Any embedding model |
-| Any OpenAI-compatible | `custom` | — |
+| vLLM | `vllm` | 任意嵌入模型 |
+| 任意 OpenAI 兼容 | `custom` | — |
 
 </details>
 
 <details>
-<summary><b>Supported Web Search Providers</b></summary>
+<summary><b>支持的联网搜索提供商</b></summary>
 
-| Provider | Env Key | Notes |
+| 提供商 | 环境变量键 | 说明 |
 |:--|:--|:--|
-| Brave | `BRAVE_API_KEY` | Recommended, free tier available |
+| Brave | `BRAVE_API_KEY` | 推荐，有免费额度 |
 | Tavily | `TAVILY_API_KEY` | |
 | Jina | `JINA_API_KEY` | |
-| SearXNG | — | Self-hosted, no API key needed |
-| DuckDuckGo | — | No API key needed |
-| Perplexity | `PERPLEXITY_API_KEY` | Requires API key |
+| SearXNG | — | 自托管，无需 API Key |
+| DuckDuckGo | — | 无需 API Key |
+| Perplexity | `PERPLEXITY_API_KEY` | 需要 API Key |
 
 </details>
 
-**3. Start services**
+**3. 启动服务**
 
 ```bash
-# Backend (FastAPI)
+# 后端（FastAPI）
 python -m deeptutor.api.run_server
 
-# Frontend (Next.js) — in a separate terminal
+# 前端（Next.js）— 另开终端
 cd web && npm run dev -- -p 3782
 ```
 
-| Service | Default Port |
+| 服务 | 默认端口 |
 |:---:|:---:|
-| Backend | `8001` |
-| Frontend | `3782` |
+| 后端 | `8001` |
+| 前端 | `3782` |
 
-Open [http://localhost:3782](http://localhost:3782) and you're ready to go.
+浏览器打开 [http://localhost:3782](http://localhost:3782)。
 
-### Option C — Docker Deployment
+### 方案 C — Docker 部署
 
-Docker wraps the backend and frontend into a single container — no local Python or Node.js required. Two options depending on your preference:
+Docker 将前后端打包为单容器，本机无需 Python/Node。任选其一：
 
-**1. Configure environment variables** (required for both options)
+**1. 配置环境变量**（两种方式均需）
 
 ```bash
 git clone https://github.com/HKUDS/DeepTutor.git
@@ -229,255 +230,257 @@ cd DeepTutor
 cp .env.example .env
 ```
 
-Edit `.env` and fill in at least the required fields (same as [Option B](#option-b--manual-local-install) above).
+编辑 `.env`，填写必填项（与[方案 B](#option-b-manual)相同）。
 
-**2a. Pull official image (recommended)**
+**2a. 拉取官方镜像（推荐）**
 
-Official images are published to [GitHub Container Registry](https://github.com/HKUDS/DeepTutor/pkgs/container/deeptutor) on every release, built for `linux/amd64` and `linux/arm64`.
+镜像发布于 [GitHub Container Registry](https://github.com/HKUDS/DeepTutor/pkgs/container/deeptutor)，支持 `linux/amd64` 与 `linux/arm64`。
 
 ```bash
 docker compose -f docker-compose.ghcr.yml up -d
 ```
 
-To pin a specific version, edit the image tag in `docker-compose.ghcr.yml`:
+固定版本可编辑 `docker-compose.ghcr.yml` 中的镜像标签：
 
 ```yaml
-image: ghcr.io/hkuds/deeptutor:1.0.0  # or :latest
+image: ghcr.io/hkuds/deeptutor:1.0.0  # 或 :latest
 ```
 
-**2b. Build from source**
+**2b. 源码构建**
 
 ```bash
 docker compose up -d
 ```
 
-This builds the image locally from `Dockerfile` and starts the container.
+本地根据 `Dockerfile` 构建并启动。
 
-**3. Verify & manage**
+**3. 验证与管理**
 
-Open [http://localhost:3782](http://localhost:3782) once the container is healthy.
+容器健康后打开 [http://localhost:3782](http://localhost:3782)。
 
 ```bash
-docker compose logs -f   # tail logs
-docker compose down       # stop and remove container
+docker compose logs -f   # 查看日志
+docker compose down      # 停止并移除容器
 ```
 
 <details>
-<summary><b>Cloud / remote server deployment</b></summary>
+<summary><b>云端 / 远程部署</b></summary>
 
-When deploying to a remote server, the browser needs to know the public URL of the backend API. Add one more variable to your `.env`:
+远程部署时，浏览器需知晓后端公网地址。在 `.env` 中增加：
 
 ```dotenv
-# Set to the public URL where the backend is reachable
 NEXT_PUBLIC_API_BASE_EXTERNAL=https://your-server.com:8001
 ```
 
-The frontend startup script applies this value at runtime — no rebuild needed.
+前端启动脚本会在运行时应用，无需重新构建。
 
 </details>
 
 <details>
-<summary><b>Development mode (hot-reload)</b></summary>
+<summary><b>开发模式（热重载）</b></summary>
 
-Layer the dev override to mount source code and enable hot-reload for both services:
+叠加 dev 覆盖以挂载源码并热重载：
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 ```
 
-Changes to `deeptutor/`, `deeptutor_cli/`, `scripts/`, and `web/` are reflected immediately.
+`deeptutor/`、`deeptutor_cli/`、`scripts/`、`web/` 的修改会即时生效。
 
 </details>
 
 <details>
-<summary><b>Custom ports</b></summary>
+<summary><b>自定义端口</b></summary>
 
-Override the default ports in `.env`:
+在 `.env` 中覆盖：
 
 ```dotenv
 BACKEND_PORT=9001
 FRONTEND_PORT=4000
 ```
 
-Then restart:
+然后重启：
 
 ```bash
-docker compose up -d     # or docker compose -f docker-compose.ghcr.yml up -d
+docker compose up -d     # 或 docker compose -f docker-compose.ghcr.yml up -d
 ```
 
 </details>
 
 <details>
-<summary><b>Data persistence</b></summary>
+<summary><b>数据持久化</b></summary>
 
-User data and knowledge bases are persisted via Docker volumes mapped to local directories:
+用户数据与知识库通过卷映射到本地：
 
-| Container path | Host path | Content |
+| 容器内路径 | 宿主机路径 | 内容 |
 |:---|:---|:---|
-| `/app/data/user` | `./data/user` | Settings, memory, workspace, sessions, logs |
-| `/app/data/knowledge_bases` | `./data/knowledge_bases` | Uploaded documents & vector indices |
+| `/app/data/user` | `./data/user` | 设置、记忆、工作区、会话、日志 |
+| `/app/data/knowledge_bases` | `./data/knowledge_bases` | 上传文档与向量索引 |
 
-These directories survive `docker compose down` and are reused on the next `docker compose up`.
+`docker compose down` 后目录仍保留，下次 `up` 会复用。
 
 </details>
 
 <details>
-<summary><b>Environment variables reference</b></summary>
+<summary><b>环境变量参考</b></summary>
 
-| Variable | Required | Description |
+| 变量 | 必填 | 说明 |
 |:---|:---:|:---|
-| `LLM_BINDING` | **Yes** | LLM provider (`openai`, `anthropic`, etc.) |
-| `LLM_MODEL` | **Yes** | Model name (e.g. `gpt-4o`) |
-| `LLM_API_KEY` | **Yes** | Your LLM API key |
-| `LLM_HOST` | **Yes** | API endpoint URL |
-| `EMBEDDING_BINDING` | **Yes** | Embedding provider |
-| `EMBEDDING_MODEL` | **Yes** | Embedding model name |
-| `EMBEDDING_API_KEY` | **Yes** | Embedding API key |
-| `EMBEDDING_HOST` | **Yes** | Embedding endpoint |
-| `EMBEDDING_DIMENSION` | **Yes** | Vector dimension |
-| `SEARCH_PROVIDER` | No | Search provider (`tavily`, `jina`, `serper`, `perplexity`, etc.) |
-| `SEARCH_API_KEY` | No | Search API key |
-| `BACKEND_PORT` | No | Backend port (default `8001`) |
-| `FRONTEND_PORT` | No | Frontend port (default `3782`) |
-| `NEXT_PUBLIC_API_BASE_EXTERNAL` | No | Public backend URL for cloud deployment |
-| `DISABLE_SSL_VERIFY` | No | Disable SSL verification (default `false`) |
+| `LLM_BINDING` | **是** | LLM 提供商（`openai`、`anthropic` 等） |
+| `LLM_MODEL` | **是** | 模型名（如 `gpt-4o`） |
+| `LLM_API_KEY` | **是** | API 密钥 |
+| `LLM_HOST` | **是** | API 地址 |
+| `EMBEDDING_BINDING` | **是** | 嵌入提供商 |
+| `EMBEDDING_MODEL` | **是** | 嵌入模型名 |
+| `EMBEDDING_API_KEY` | **是** | 嵌入 API 密钥 |
+| `EMBEDDING_HOST` | **是** | 嵌入端点 |
+| `EMBEDDING_DIMENSION` | **是** | 向量维度 |
+| `SEARCH_PROVIDER` | 否 | 搜索提供商（`tavily`、`jina`、`serper`、`perplexity` 等） |
+| `SEARCH_API_KEY` | 否 | 搜索 API 密钥 |
+| `BACKEND_PORT` | 否 | 后端端口（默认 `8001`） |
+| `FRONTEND_PORT` | 否 | 前端端口（默认 `3782`） |
+| `NEXT_PUBLIC_API_BASE_EXTERNAL` | 否 | 云端部署时后端公网 URL |
+| `DISABLE_SSL_VERIFY` | 否 | 关闭 SSL 校验（默认 `false`） |
 
 </details>
 
-### Option D — CLI Only
+### 方案 D — 仅 CLI
 
-If you just want the CLI without the web frontend:
+若只要 CLI、不要 Web 前端：
 
 ```bash
 pip install -e ".[cli]"
-deeptutor chat                                   # Interactive REPL
-deeptutor run chat "Explain Fourier transform"   # One-shot capability
-deeptutor run deep_solve "Solve x^2 = 4"         # Multi-agent problem solving
-deeptutor kb create my-kb --doc textbook.pdf     # Build a knowledge base
+deeptutor chat                                   # 交互 REPL
+deeptutor run chat "Explain Fourier transform"   # 单次能力调用
+deeptutor run deep_solve "Solve x^2 = 4"         # 多智能体解题
+deeptutor kb create my-kb --doc textbook.pdf     # 构建知识库
 ```
 
-> See [DeepTutor CLI](#%EF%B8%8F-deeptutor-cli--agent-native-interface) for the full feature guide and command reference.
+> 完整 CLI 说明与命令表见 [DeepTutor CLI](#deeptutor-cli-guide)。
 
 ---
 
-## 📖 Explore DeepTutor
+<a id="explore-deeptutor"></a>
+## 📖 探索 DeepTutor
 
 <div align="center">
-<img src="assets/figs/deeptutor-architecture.png" alt="DeepTutor Architecture" width="800">
+<img src="assets/figs/deeptutor-architecture.png" alt="DeepTutor 架构" width="800">
 </div>
 
-### 💬 Chat — Unified Intelligent Workspace
+### 💬 聊天 — 统一智能工作区
 
 <div align="center">
-<img src="assets/figs/dt-chat.png" alt="Chat Workspace" width="800">
+<img src="assets/figs/dt-chat.png" alt="聊天工作区" width="800">
 </div>
 
-Five distinct modes coexist in a single workspace, bound by a **unified context management system**. Conversation history, knowledge bases, and references persist across modes — switch between them freely within the same topic, whenever the moment calls for it.
+五种模式共处同一工作区，由统一上下文管理串联：历史、知识库与引用跨模式保留，同一主题下可随时切换。
 
-| Mode | What It Does |
+| 模式 | 作用 |
 |:---|:---|
-| **Chat** | Fluid, tool-augmented conversation. Choose from RAG retrieval, web search, code execution, deep reasoning, brainstorming, and paper search — mix and match as needed. |
-| **Deep Solve** | Multi-agent problem solving: plan, investigate, solve, and verify — with precise source citations at every step. |
-| **Quiz Generation** | Generate assessments grounded in your knowledge base, with built-in validation. |
-| **Deep Research** | Decompose a topic into subtopics, dispatch parallel research agents across RAG, web, and academic papers, and produce a fully cited report. |
-| **Math Animator** | Turn mathematical concepts into visual animations and storyboards powered by Manim. |
+| **聊天** | 工具增强对话：RAG、联网搜索、代码执行、深度推理、头脑风暴、论文检索，按需组合。 |
+| **深度解题** | 多智能体解题：规划、检索、求解与验证，步步可溯源引用。 |
+| **测验生成** | 基于知识库出题，内置校验。 |
+| **深度研究** | 主题拆解、并行调研 RAG、网络与论文，输出带引用报告。 |
+| **数学动画** | 基于 Manim 将数学概念可视化为动画与分镜。 |
 
-Tools are **decoupled from workflows** — in every mode, you decide which tools to enable, how many to use, or whether to use any at all. The workflow orchestrates the reasoning; the tools are yours to compose.
+工具与工作流解耦：每种模式下你可自选启用哪些工具、用几个、或完全不用；流程负责推理节奏，工具由你编排。
 
-> Start with a quick chat question, escalate to Deep Solve when it gets hard, generate quiz questions to test yourself, then launch a Deep Research to go deeper — all in one continuous thread.
+> 从快速聊天起步，难题切到深度解题，自测用测验，再开深度研究深挖，同一条对话线贯穿始终。
 
-### ✍️ Co-Writer — AI Inside Your Editor
+### ✍️ Co-Writer — 编辑器里的 AI
 
 <div align="center">
 <img src="assets/figs/dt-cowriter.png" alt="Co-Writer" width="800">
 </div>
 
-Co-Writer brings the intelligence of Chat directly into a writing surface. It is a full-featured Markdown editor where AI is a first-class collaborator — not a sidebar, not an afterthought.
+Co-Writer 把聊天的智能放进写作界面：完整 Markdown 编辑器，AI 是一等协作者，而非侧栏挂件。
 
-Select any text and choose **Rewrite**, **Expand**, or **Shorten** — optionally drawing context from your knowledge base or the web. The editing flow is non-destructive with full undo/redo, and every piece you write can be saved straight to your notebooks, feeding back into your learning ecosystem.
+划选文本即可改写、扩写或缩写，可选用知识库或网络上下文；支持撤销/重做，作品可存入笔记本，回流学习生态。
 
-### 🎓 Guided Learning — Visual, Step-by-Step Mastery
-
-<div align="center">
-<img src="assets/figs/dt-guide.png" alt="Guided Learning" width="800">
-</div>
-
-Guided Learning turns your personal materials into structured, multi-step learning journeys. Provide a topic, optionally link notebook records, and DeepTutor will:
-
-1. **Design a learning plan** — Identify 3–5 progressive knowledge points from your materials.
-2. **Generate interactive pages** — Each point becomes a rich visual HTML page with explanations, diagrams, and examples.
-3. **Enable contextual Q&A** — Chat alongside each step for deeper exploration.
-4. **Summarize your progress** — Upon completion, receive a learning summary of everything you've covered.
-
-Sessions are persistent — pause, resume, or revisit any step at any time.
-
-### 📚 Knowledge Management — Your Learning Infrastructure
+### 🎓 引导式学习 — 可视化、分步掌握
 
 <div align="center">
-<img src="assets/figs/dt-knowledge.png" alt="Knowledge Management" width="800">
+<img src="assets/figs/dt-guide.png" alt="引导式学习" width="800">
 </div>
 
-Knowledge is where you build and manage the document collections that power everything else in DeepTutor.
+将个人材料变成结构化、多步学习路径：给出主题，可选关联笔记本记录，DeepTutor 将：
 
-- **Knowledge Bases** — Upload PDF, TXT, or Markdown files to create searchable, RAG-ready collections. Add documents incrementally as your library grows.
-- **Notebooks** — Organize learning records across sessions. Save insights from Chat, Guided Learning, Co-Writer, or Deep Research into categorized, color-coded notebooks.
+1. **设计学习计划** — 从材料中提炼 3 到 5 个递进知识点。
+2. **生成交互页面** — 每点对应富视觉 HTML 页面，含讲解、图示与示例。
+3. **上下文问答** — 每步旁路聊天，深入探讨。
+4. **学习小结** — 结束后汇总所学。
 
-Your knowledge base is not passive storage — it actively participates in every conversation, every research session, and every learning path you create.
+会话可暂停、恢复或回看任一步。
 
-### 🧠 Memory — DeepTutor Learns As You Learn
+### 📚 知识管理 — 学习基础设施
 
 <div align="center">
-<img src="assets/figs/dt-memory.png" alt="Memory" width="800">
+<img src="assets/figs/dt-knowledge.png" alt="知识管理" width="800">
 </div>
 
-DeepTutor maintains a persistent, evolving understanding of you through two complementary dimensions:
+在此构建与管理驱动全局的文档集合。
 
-- **Summary** — A running digest of your learning progress: what you've studied, which topics you've explored, and how your understanding has developed.
-- **Profile** — Your learner identity: preferences, knowledge level, goals, and communication style — automatically refined through every interaction.
+- **知识库** — 上传 PDF、TXT、Markdown，形成可检索、RAG 就绪的集合；可增量追加。
+- **笔记本** — 跨会话整理学习记录；聊天、引导学习、Co-Writer、深度研究的洞见可按色分类保存。
 
-Memory is shared across all features and all your TutorBots. The more you use DeepTutor, the more personalized and effective it becomes.
+知识库不是冷存储，它主动参与每次对话、研究与学习路径。
+
+### 🧠 记忆 — 与你一同成长
+
+<div align="center">
+<img src="assets/figs/dt-memory.png" alt="记忆" width="800">
+</div>
+
+DeepTutor 从两个互补维度持续理解你：
+
+- **摘要** — 学习进度流水账：学过什么、探索过哪些主题、理解如何演进。
+- **学习画像** — 学习者身份：偏好、水平、目标与沟通风格，随交互自动精炼。
+
+记忆在全功能与 TutorBot 间共享；用得越多，越贴合你。
 
 ---
 
-### 🦞 TutorBot — Persistent, Autonomous AI Tutors
+<a id="tutorbot"></a>
+### 🦞 TutorBot — 持久、自主的 AI 导师
 
 <div align="center">
-<img src="assets/figs/tutorbot-architecture.png" alt="TutorBot Architecture" width="800">
+<img src="assets/figs/tutorbot-architecture.png" alt="TutorBot 架构" width="800">
 </div>
 
-TutorBot is not a chatbot — it is a **persistent, multi-instance agent** built on [nanobot](https://github.com/HKUDS/nanobot). Each TutorBot runs its own agent loop with independent workspace, memory, and personality. Create a Socratic math tutor, a patient writing coach, and a rigorous research advisor — all running simultaneously, each evolving with you.
+TutorBot 不是聊天机器人，它是基于 [nanobot](https://github.com/HKUDS/nanobot) 的持久、可多实例智能体。每个实例独立循环、工作区、记忆与人格；你可同时运行多个角色，各自演进。
 
 <div align="center">
 <img src="assets/figs/tb.png" alt="TutorBot" width="800">
 </div>
 
-- **Soul Templates** — Define your tutor's personality, tone, and teaching philosophy through editable Soul files. Choose from built-in archetypes (Socratic, encouraging, rigorous) or craft your own — the soul shapes every response.
-- **Independent Workspace** — Each bot has its own directory with separate memory, sessions, skills, and configuration — fully isolated yet able to access DeepTutor's shared knowledge layer.
-- **Proactive Heartbeat** — Bots don't just respond — they initiate. The built-in Heartbeat system enables recurring study check-ins, review reminders, and scheduled tasks. Your tutor shows up even when you don't.
-- **Full Tool Access** — Every bot reaches into DeepTutor's complete toolkit: RAG retrieval, code execution, web search, academic paper search, deep reasoning, and brainstorming.
-- **Skill Learning** — Teach your bot new abilities by adding skill files to its workspace. As your needs evolve, so does your tutor's capability.
-- **Multi-Channel Presence** — Connect bots to Telegram, Discord, Slack, Feishu, WeChat Work, DingTalk, Email, and more. Your tutor meets you wherever you are.
-- **Team & Sub-Agents** — Spawn background sub-agents or orchestrate multi-agent teams within a single bot for complex, long-running tasks.
+- **Soul 模板** — 通过可编辑 Soul 文件定义人格、语气与教学理念；可选内置原型或完全自定义。
+- **独立工作区** — 每实例独立目录：记忆、会话、技能与配置隔离，仍可访问 DeepTutor 共享知识层。
+- **主动心跳** — 不止被动回复：心跳系统支持定期学习提醒、复习与计划任务。
+- **完整工具** — RAG、代码执行、联网、论文检索、深度推理、头脑风暴。
+- **技能扩展** — 在工作区添加技能文件即可教会新能力。
+- **多通道** — 可接 Telegram、Discord、Slack、飞书、企业微信、钉钉、邮件等。
+- **团队与子智能体** — 后台子任务或多智能体协作，应对长程复杂任务。
 
 ```bash
 deeptutor bot create math-tutor --persona "Socratic math teacher who uses probing questions"
 deeptutor bot create writing-coach --persona "Patient, detail-oriented writing mentor"
-deeptutor bot list                  # See all your active tutors
+deeptutor bot list                  # 查看所有导师实例
 ```
 
 ---
 
-### ⌨️ DeepTutor CLI — Agent-Native Interface
+<a id="deeptutor-cli-guide"></a>
+### ⌨️ DeepTutor CLI — 智能体原生界面
 
 <div align="center">
-<img src="assets/figs/cli-architecture.png" alt="DeepTutor CLI Architecture" width="800">
+<img src="assets/figs/cli-architecture.png" alt="DeepTutor CLI 架构" width="800">
 </div>
 
-DeepTutor is fully CLI-native. Every capability, knowledge base, session, memory, and TutorBot is one command away — no browser required. The CLI serves both humans (with rich terminal rendering) and AI agents (with structured JSON output).
+DeepTutor 全面 CLI 化：能力、知识库、会话、记忆、TutorBot 均可命令行操作，无需浏览器。终端 Rich 输出面向人类，JSON 面向智能体与流水线。
 
-Hand the [`SKILL.md`](SKILL.md) at the project root to any tool-using agent ([nanobot](https://github.com/HKUDS/nanobot), or any LLM with tool access), and it can configure and operate DeepTutor autonomously.
+将项目根目录 [`SKILL.md`](SKILL.md) 交给任意支持工具的代理（[nanobot](https://github.com/HKUDS/nanobot) 或其他 LLM），即可自主配置与操作。
 
-**One-shot execution** — Run any capability directly from the terminal:
+**单次执行** — 终端直接跑任意能力：
 
 ```bash
 deeptutor run chat "Explain the Fourier transform" -t rag --kb textbook
@@ -486,142 +489,143 @@ deeptutor run deep_question "Linear algebra" --config num_questions=5
 deeptutor run deep_research "Attention mechanisms in transformers"
 ```
 
-**Interactive REPL** — A persistent chat session with live mode switching:
+**交互 REPL** — 持久会话，运行时切换模式：
 
 ```bash
 deeptutor chat --capability deep_solve --kb my-kb
-# Inside the REPL: /cap, /tool, /kb, /history, /notebook, /config to switch on the fly
+# 在 REPL 内：/cap、/tool、/kb、/history、/notebook、/config 可随时切换
 ```
 
-**Knowledge base lifecycle** — Build, query, and manage RAG-ready collections entirely from the terminal:
+**知识库闭环** — 终端完成建库、追加与检索：
 
 ```bash
-deeptutor kb create my-kb --doc textbook.pdf       # Create from document
-deeptutor kb add my-kb --docs-dir ./papers/         # Add a folder of papers
-deeptutor kb search my-kb "gradient descent"        # Search directly
-deeptutor kb set-default my-kb                      # Set as default for all commands
+deeptutor kb create my-kb --doc textbook.pdf
+deeptutor kb add my-kb --docs-dir ./papers/
+deeptutor kb search my-kb "gradient descent"
+deeptutor kb set-default my-kb
 ```
 
-**Dual output mode** — Rich rendering for humans, structured JSON for pipelines:
+**双输出模式** — Rich 给人看，JSON 给管道：
 
 ```bash
-deeptutor run chat "Summarize chapter 3" -f rich    # Colored, formatted output
-deeptutor run chat "Summarize chapter 3" -f json    # Line-delimited JSON events
+deeptutor run chat "Summarize chapter 3" -f rich
+deeptutor run chat "Summarize chapter 3" -f json
 ```
 
-**Session continuity** — Resume any conversation right where you left off:
+**会话续接** — 断点续聊：
 
 ```bash
-deeptutor session list                              # List all sessions
-deeptutor session open <id>                         # Resume in REPL
+deeptutor session list
+deeptutor session open <id>
 ```
 
 <details>
-<summary><b>Full CLI command reference</b></summary>
+<summary><b>CLI 命令参考（完整）</b></summary>
 
-**Top-level**
+**顶层**
 
-| Command | Description |
+| 命令 | 说明 |
 |:---|:---|
-| `deeptutor run <capability> <message>` | Run any capability in a single turn (`chat`, `deep_solve`, `deep_question`, `deep_research`, `math_animator`) |
-| `deeptutor chat` | Interactive REPL with optional `--capability`, `--tool`, `--kb`, `--language` |
-| `deeptutor serve` | Start the DeepTutor API server |
+| `deeptutor run <capability> <message>` | 单次执行能力（`chat`、`deep_solve`、`deep_question`、`deep_research`、`math_animator`） |
+| `deeptutor chat` | 交互 REPL，可选 `--capability`、`--tool`、`--kb`、`--language` |
+| `deeptutor serve` | 启动 API 服务 |
 
 **`deeptutor bot`**
 
-| Command | Description |
+| 命令 | 说明 |
 |:---|:---|
-| `deeptutor bot list` | List all TutorBot instances |
-| `deeptutor bot create <id>` | Create and start a new bot (`--name`, `--persona`, `--model`) |
-| `deeptutor bot start <id>` | Start a bot |
-| `deeptutor bot stop <id>` | Stop a bot |
+| `deeptutor bot list` | 列出 TutorBot |
+| `deeptutor bot create <id>` | 创建并启动（`--name`、`--persona`、`--model`） |
+| `deeptutor bot start <id>` | 启动 |
+| `deeptutor bot stop <id>` | 停止 |
 
 **`deeptutor kb`**
 
-| Command | Description |
+| 命令 | 说明 |
 |:---|:---|
-| `deeptutor kb list` | List all knowledge bases |
-| `deeptutor kb info <name>` | Show knowledge base details |
-| `deeptutor kb create <name>` | Create from documents (`--doc`, `--docs-dir`) |
-| `deeptutor kb add <name>` | Add documents incrementally |
-| `deeptutor kb search <name> <query>` | Search a knowledge base |
-| `deeptutor kb set-default <name>` | Set as default KB |
-| `deeptutor kb delete <name>` | Delete a knowledge base (`--force`) |
+| `deeptutor kb list` | 列出知识库 |
+| `deeptutor kb info <name>` | 详情 |
+| `deeptutor kb create <name>` | 从文档创建（`--doc`、`--docs-dir`） |
+| `deeptutor kb add <name>` | 增量添加 |
+| `deeptutor kb search <name> <query>` | 检索 |
+| `deeptutor kb set-default <name>` | 设为默认 |
+| `deeptutor kb delete <name>` | 删除（`--force`） |
 
 **`deeptutor memory`**
 
-| Command | Description |
+| 命令 | 说明 |
 |:---|:---|
-| `deeptutor memory show [file]` | View memory (`summary`, `profile`, or `all`) |
-| `deeptutor memory clear [file]` | Clear memory (`--force`) |
+| `deeptutor memory show [file]` | 查看（`summary`、`profile`、`all`） |
+| `deeptutor memory clear [file]` | 清空（`--force`） |
 
 **`deeptutor session`**
 
-| Command | Description |
+| 命令 | 说明 |
 |:---|:---|
-| `deeptutor session list` | List sessions (`--limit`) |
-| `deeptutor session show <id>` | View session messages |
-| `deeptutor session open <id>` | Resume session in REPL |
-| `deeptutor session rename <id>` | Rename a session (`--title`) |
-| `deeptutor session delete <id>` | Delete a session |
+| `deeptutor session list` | 列表（`--limit`） |
+| `deeptutor session show <id>` | 消息 |
+| `deeptutor session open <id>` | REPL 续聊 |
+| `deeptutor session rename <id>` | 重命名（`--title`） |
+| `deeptutor session delete <id>` | 删除 |
 
 **`deeptutor notebook`**
 
-| Command | Description |
+| 命令 | 说明 |
 |:---|:---|
-| `deeptutor notebook list` | List notebooks |
-| `deeptutor notebook create <name>` | Create a notebook (`--description`) |
-| `deeptutor notebook show <id>` | View notebook records |
-| `deeptutor notebook add-md <id> <path>` | Import markdown as record |
-| `deeptutor notebook replace-md <id> <rec> <path>` | Replace a markdown record |
-| `deeptutor notebook remove-record <id> <rec>` | Remove a record |
+| `deeptutor notebook list` | 列表 |
+| `deeptutor notebook create <name>` | 创建（`--description`） |
+| `deeptutor notebook show <id>` | 记录 |
+| `deeptutor notebook add-md <id> <path>` | 导入 Markdown |
+| `deeptutor notebook replace-md <id> <rec> <path>` | 替换记录 |
+| `deeptutor notebook remove-record <id> <rec>` | 删除记录 |
 
 **`deeptutor config` / `plugin` / `provider`**
 
-| Command | Description |
+| 命令 | 说明 |
 |:---|:---|
-| `deeptutor config show` | Print current configuration summary |
-| `deeptutor plugin list` | List registered tools and capabilities |
-| `deeptutor plugin info <name>` | Show tool or capability details |
-| `deeptutor provider login <provider>` | Provider auth (`openai-codex` OAuth login; `github-copilot` validates an existing Copilot auth session) |
+| `deeptutor config show` | 配置摘要 |
+| `deeptutor plugin list` | 已注册工具与能力 |
+| `deeptutor plugin info <name>` | 工具或能力详情 |
+| `deeptutor provider login <provider>` | 提供商认证（`openai-codex` 执行 OAuth 登录；`github-copilot` 校验现有 Copilot 认证会话） |
 
 </details>
 
-## 🗺️ Roadmap
+<a id="roadmap"></a>
+## 🗺️ 路线图
 
-| Status | Milestone |
+| 状态 | 里程碑 |
 |:---:|:---|
-| 🔜 | **Authentication & Login** — Optional login page for public deployments with multi-user support |
-| 🔜 | **Themes & Appearance** — Diverse theme options and customizable UI appearance |
-| 🔜 | **LightRAG Integration** — Integrate [LightRAG](https://github.com/HKUDS/LightRAG) as an advanced knowledge base engine |
-| 🔜 | **Documentation Site** — Comprehensive docs page with guides, API reference, and tutorials |
+| 🔜 | **身份认证与登录** — 面向公网部署的可选登录页与多用户支持 |
+| 🔜 | **主题与外观** — 多种主题与可定制界面 |
+| 🔜 | **LightRAG 集成** — 将 [LightRAG](https://github.com/HKUDS/LightRAG) 作为高阶知识库引擎接入 |
+| 🔜 | **文档站点** — 含指南、API 参考与教程的完整文档站 |
 
-> If you find DeepTutor useful, [give us a star](https://github.com/HKUDS/DeepTutor/stargazers) — it helps us keep going!
+> 若 DeepTutor 对你有帮助，欢迎 [点亮 Star](https://github.com/HKUDS/DeepTutor/stargazers)，这对我们是很大的鼓励。
 
 ---
 
-## 🌐 Community & Ecosystem
+<a id="community"></a>
+## 🌐 社区与生态
 
-DeepTutor stands on the shoulders of outstanding open-source projects:
+DeepTutor 受益于优秀开源项目：
 
-| Project | Role in DeepTutor |
+| 项目 | 在 DeepTutor 中的角色 |
 |:---|:---|
-| [**nanobot**](https://github.com/HKUDS/nanobot) | Ultra-lightweight agent engine powering TutorBot |
-| [**LlamaIndex**](https://github.com/run-llama/llama_index) | RAG pipeline and document indexing backbone |
-| [**ManimCat**](https://github.com/Wing900/ManimCat) | AI-driven math animation generation for Math Animator |
+| [**nanobot**](https://github.com/HKUDS/nanobot) | 驱动 TutorBot 的轻量智能体引擎 |
+| [**LlamaIndex**](https://github.com/run-llama/llama_index) | RAG 与文档索引骨干 |
+| [**ManimCat**](https://github.com/Wing900/ManimCat) | 数学动画（Math Animator）的 AI 生成 |
 
-**From the HKUDS ecosystem:**
+**HKUDS 生态：**
 
 | [⚡ LightRAG](https://github.com/HKUDS/LightRAG) | [🤖 AutoAgent](https://github.com/HKUDS/AutoAgent) | [🔬 AI-Researcher](https://github.com/HKUDS/AI-Researcher) | [🧬 nanobot](https://github.com/HKUDS/nanobot) |
 |:---:|:---:|:---:|:---:|
-| Simple & Fast RAG | Zero-Code Agent Framework | Automated Research | Ultra-Lightweight AI Agent |
+| 简洁高速 RAG | 零代码智能体框架 | 自动化研究 | 超轻量 AI 智能体 |
 
-
-## 🤝 Contributing
+## 🤝 参与贡献
 
 <div align="center">
 
-We hope DeepTutor becomes a gift for the community. 🎁
+希望 DeepTutor 能成为送给社区的一份礼物。
 
 <a href="https://github.com/HKUDS/DeepTutor/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=HKUDS/DeepTutor&max=999" alt="Contributors" />
@@ -629,9 +633,9 @@ We hope DeepTutor becomes a gift for the community. 🎁
 
 </div>
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on setting up your development environment, code standards, and pull request workflow.
+请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解开发环境、规范与 PR 流程。
 
-## ⭐ Star History
+## ⭐ Star 历史
 
 <div align="center">
 
@@ -649,11 +653,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on setting up your develop
 
 **[Data Intelligence Lab @ HKU](https://github.com/HKUDS)**
 
-[⭐ Star us](https://github.com/HKUDS/DeepTutor/stargazers) · [🐛 Report a bug](https://github.com/HKUDS/DeepTutor/issues) · [💬 Discussions](https://github.com/HKUDS/DeepTutor/discussions)
+[⭐ Star](https://github.com/HKUDS/DeepTutor/stargazers) · [🐛 反馈问题](https://github.com/HKUDS/DeepTutor/issues) · [💬 讨论](https://github.com/HKUDS/DeepTutor/discussions)
 
 ---
 
-Licensed under the [Apache License 2.0](LICENSE).
+采用 [Apache License 2.0](LICENSE) 许可。
 
 <p>
   <img src="https://visitor-badge.laobi.icu/badge?page_id=HKUDS.DeepTutor&style=for-the-badge&color=00d4ff" alt="Views">

@@ -22,11 +22,11 @@ class ProviderCliDocsContractTest(unittest.TestCase):
 
     def test_readmes_match_the_cli_contract(self) -> None:
         self.assertIn(
-            'Provider auth (`openai-codex` OAuth login; `github-copilot` validates an existing Copilot auth session)',
+            '提供商认证（`openai-codex` 执行 OAuth 登录；`github-copilot` 校验现有 Copilot 认证会话）',
             ROOT_README,
         )
         self.assertIn('deeptutor provider login github-copilot    # 校验现有 GitHub Copilot 认证是否可用', CLI_README)
-        self.assertNotIn('OAuth login (`openai-codex`, `github-copilot`)', ROOT_README)
+        self.assertNotIn('OAuth（`openai-codex`、`github-copilot`）', ROOT_README)
 
 
 if __name__ == "__main__":
