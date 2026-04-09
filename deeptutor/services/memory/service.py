@@ -10,13 +10,24 @@ workspace directory, not in the shared memory dir.
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from datetime import datetime
+import logging
 from pathlib import Path
+import re
 from typing import Literal
 
 from deeptutor.services.llm import stream as llm_stream
+from deeptutor.services.memory.ingestion import SharedMemoryIngestion
+from deeptutor.services.memory.projection import (
+    PROFILE_CATEGORIES,
+    SUMMARY_CATEGORIES,
+    SharedMemoryProjection,
+)
+from deeptutor.services.memory.provider import (
+    BaseLongTermMemoryProvider,
+    get_long_term_memory_provider,
+)
 from deeptutor.services.path_service import PathService, get_path_service
 from deeptutor.services.session.sqlite_store import SQLiteSessionStore, get_sqlite_session_store
 
@@ -29,6 +40,8 @@ _FILENAMES: dict[MemoryFile, str] = {
     "summary": "SUMMARY.md",
     "profile": "PROFILE.md",
 }
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -53,10 +66,17 @@ class MemoryService:
         self,
         path_service: PathService | None = None,
         store: SQLiteSessionStore | None = None,
+        provider: BaseLongTermMemoryProvider | None = None,
+        ingestor: SharedMemoryIngestion | None = None,
+        projection: SharedMemoryProjection | None = None,
     ) -> None:
         self._path_service = path_service or get_path_service()
         self._store = store or get_sqlite_session_store()
+        self._provider = provider or get_long_term_memory_provider()
+        self._projection = projection or SharedMemoryProjection()
+        self._ingestor = ingestor or SharedMemoryIngestion(self._projection)
         self._migrate_legacy()
+        self._bootstrap_provider_from_views()
 
     @property
     def _memory_dir(self) -> Path:
@@ -90,6 +110,24 @@ class MemoryService:
             )
         legacy.rename(legacy.with_suffix(".md.bak"))
 
+    def _bootstrap_provider_from_views(self) -> None:
+        """Seed mem0 from existing governance views when enabling it on an existing install."""
+        if not self._provider.is_enabled():
+            return
+        try:
+            if self._provider.list_memories():
+                return
+            for view in MEMORY_FILES:
+                content = self.read_file(view)
+                if content:
+                    self._ingestor.sync_manual_view(
+                        self._provider,
+                        view=view,
+                        content=content,
+                    )
+        except Exception:
+            logger.debug("Failed to bootstrap provider from existing views", exc_info=True)
+
     # ── Read ──────────────────────────────────────────────────────────
 
     def read_file(self, which: MemoryFile) -> str:
@@ -117,6 +155,11 @@ class MemoryService:
             return None
 
     def read_snapshot(self) -> MemorySnapshot:
+        if self._provider.is_enabled():
+            try:
+                self._sync_views_from_provider()
+            except Exception:
+                logger.debug("Failed to sync provider views before snapshot read", exc_info=True)
         return MemorySnapshot(
             summary=self.read_summary(),
             profile=self.read_profile(),
@@ -130,11 +173,25 @@ class MemoryService:
         normalized = str(content or "").strip()
         path = self._path(which)
         path.parent.mkdir(parents=True, exist_ok=True)
+        if self._provider.is_enabled() and not normalized:
+            try:
+                self._clear_provider_view(which)
+            except Exception:
+                logger.debug("Failed to clear provider-backed %s memories on empty save", which, exc_info=True)
         if not normalized:
             if path.exists():
                 path.unlink()
         else:
             path.write_text(normalized, encoding="utf-8")
+        if self._provider.is_enabled():
+            try:
+                self._ingestor.sync_manual_view(
+                    self._provider,
+                    view=which,
+                    content=normalized,
+                )
+            except Exception:
+                logger.debug("Failed to sync manual %s view to provider", which, exc_info=True)
         return self.read_snapshot()
 
     def write_memory(self, content: str) -> MemorySnapshot:
@@ -145,6 +202,11 @@ class MemoryService:
         return self.write_file(which, "")
 
     def clear_memory(self) -> MemorySnapshot:
+        if self._provider.is_enabled():
+            try:
+                self._provider.clear()
+            except Exception:
+                logger.debug("Failed to clear provider-backed memories", exc_info=True)
         for f in MEMORY_FILES:
             path = self._path(f)
             if path.exists():
@@ -153,7 +215,32 @@ class MemoryService:
 
     # ── Context building (injected into LLM prompts) ─────────────────
 
-    def build_memory_context(self, max_chars: int = 4000) -> str:
+    def build_memory_context(
+        self,
+        max_chars: int = 4000,
+        *,
+        query: str = "",
+        capability: str = "chat",
+    ) -> str:
+        if self._provider.is_enabled():
+            try:
+                all_records = self._provider.list_memories()
+                search_records = (
+                    self._provider.search(query=query, limit=12)
+                    if str(query or "").strip()
+                    else []
+                )
+                projected = self._projection.build_context(
+                    all_records=all_records,
+                    search_records=search_records,
+                    capability=capability,
+                    max_chars=max_chars,
+                )
+                if projected:
+                    return projected
+            except Exception:
+                logger.debug("Provider-backed memory context build failed", exc_info=True)
+
         parts: list[str] = []
 
         profile = self.read_profile()
@@ -178,6 +265,13 @@ class MemoryService:
         )
 
     def get_preferences_text(self) -> str:
+        if self._provider.is_enabled():
+            try:
+                rendered = self._projection.preferences_markdown(self._provider.list_memories())
+                if rendered:
+                    return rendered
+            except Exception:
+                logger.debug("Provider-backed preference projection failed", exc_info=True)
         profile = self.read_profile()
         return f"## User Profile\n{profile}" if profile else ""
 
@@ -195,6 +289,23 @@ class MemoryService:
     ) -> MemoryUpdateResult:
         if not user_message.strip() or not assistant_message.strip():
             return MemoryUpdateResult(content="", changed=False, updated_at=None)
+
+        if self._provider.is_enabled():
+            changed = self._ingestor.ingest_turn(
+                self._provider,
+                user_message=user_message,
+                assistant_message=assistant_message,
+                session_id=session_id,
+                capability=capability,
+                language=language,
+                timestamp=timestamp,
+            )
+            snap = self.read_snapshot()
+            return MemoryUpdateResult(
+                content=snap.profile,
+                changed=changed,
+                updated_at=snap.profile_updated_at,
+            )
 
         source = (
             f"[Session] {session_id or '(unknown)'}\n"
@@ -239,6 +350,25 @@ class MemoryService:
 
         if not relevant:
             return MemoryUpdateResult(content="", changed=False, updated_at=None)
+
+        if self._provider.is_enabled():
+            cap = ""
+            sess = await self._store.get_session(target)
+            if sess:
+                cap = str(sess.get("capability", "") or "")
+            changed = self._ingestor.ingest_session(
+                self._provider,
+                messages=relevant,
+                session_id=target,
+                capability=cap or "chat",
+                language=language,
+            )
+            snap = self.read_snapshot()
+            return MemoryUpdateResult(
+                content=snap.profile,
+                changed=changed,
+                updated_at=snap.profile_updated_at,
+            )
 
         transcript = "\n\n".join(
             f"{'User' if m.get('role') == 'user' else 'Assistant'}: "
@@ -345,6 +475,34 @@ class MemoryService:
         )
 
     # ── Helpers ───────────────────────────────────────────────────────
+
+    def _sync_views_from_provider(self) -> None:
+        records = self._provider.list_memories()
+        projected = self._projection.project_views(records)
+        self._write_projection_file("profile", projected.profile)
+        self._write_projection_file("summary", projected.summary)
+
+    def _write_projection_file(self, which: MemoryFile, content: str) -> None:
+        path = self._path(which)
+        normalized = str(content or "").strip()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not normalized:
+            if path.exists():
+                path.unlink()
+            return
+        path.write_text(normalized, encoding="utf-8")
+
+    def _clear_provider_view(self, which: MemoryFile) -> None:
+        scope_categories = PROFILE_CATEGORIES if which == "profile" else SUMMARY_CATEGORIES
+        to_delete = []
+        for item in self._provider.list_memories():
+            category = str(item.category or item.metadata.get("category", "") or "").strip().lower()
+            scope = str(item.scope or item.metadata.get("scope", "") or "").strip().lower()
+            if scope == which or category in scope_categories:
+                if item.id:
+                    to_delete.append(item.id)
+        if to_delete:
+            self._provider.delete_memories(to_delete)
 
     @staticmethod
     def _extract_legacy_sections(content: str) -> tuple[str, str]:

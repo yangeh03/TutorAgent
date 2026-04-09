@@ -10,17 +10,18 @@ External interface (preserved for API compatibility):
 from __future__ import annotations
 
 import asyncio
-import os
-import traceback
 from datetime import datetime
+import os
 from pathlib import Path
+import traceback
 from typing import Any
 
 import yaml
 
+from deeptutor.core.trace import derive_trace_metadata, new_call_id
+
 from ...services.config import parse_language
 from ...services.path_service import get_path_service
-from deeptutor.core.trace import derive_trace_metadata, new_call_id
 from .agents import PlannerAgent, SolverAgent, WriterAgent
 from .memory import Scratchpad, Source
 from .tool_runtime import SolveToolRuntime
@@ -72,6 +73,7 @@ class MainSolver:
         self.token_tracker: TokenTracker | None = None
         self._trace_callback: Any = None
         self._conversation_context: str = ""
+        self._shared_memory_context: str = ""
 
         # Agents (set in ainit)
         self.planner_agent: PlannerAgent | None = None
@@ -269,6 +271,7 @@ class MainSolver:
         verbose: bool = True,
         detailed: bool | None = None,
         conversation_context: str = "",
+        long_term_memory_context: str = "",
     ) -> dict[str, Any]:
         """Run the full Plan -> ReAct -> Write pipeline.
 
@@ -285,6 +288,7 @@ class MainSolver:
             detailed = self.config.get("solve", {}).get("detailed_answer", False)
         self._detailed = detailed
         self._conversation_context = conversation_context.strip()
+        self._shared_memory_context = str(long_term_memory_context or "").strip()
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         path_service = get_path_service()
@@ -840,6 +844,8 @@ class MainSolver:
 
     def _get_user_preference(self) -> str:
         """Get personalisation preference (optional)."""
+        if self._shared_memory_context:
+            return self._shared_memory_context
         try:
             from deeptutor.services.memory import get_memory_service
 
@@ -849,12 +855,12 @@ class MainSolver:
 
     async def _get_planner_memory_context(self, question: str) -> str:
         _ = question
-        return self._merge_memory_context("")
+        return self._merge_memory_context(self._shared_memory_context)
 
     async def _get_solver_memory_context(self, step_goal: str) -> str:
         _ = step_goal
         return self._merge_memory_context(
-            "",
+            self._shared_memory_context,
             include_conversation=False,
         )
 

@@ -43,3 +43,6 @@ ddgs>=9.9.1
 
 # --- Shared terminal rendering used outside the removed CLI package ---
 rich>=13.0.0
+
+# --- Shared long-term memory ---
+mem0ai>=0.1.0

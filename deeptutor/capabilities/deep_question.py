@@ -60,9 +60,14 @@ class DeepQuestionCapability(BaseCapability):
                 answer = await agent.process(
                     user_message=context.user_message,
                     question_context=followup_question_context,
-                    history_context=str(
-                        context.metadata.get("conversation_context_text", "") or ""
-                    ).strip(),
+                    history_context="\n\n".join(
+                        part
+                        for part in [
+                            str(context.metadata.get("conversation_context_text", "") or "").strip(),
+                            str(context.memory_context or "").strip(),
+                        ]
+                        if part
+                    ),
                 )
                 if answer:
                     await stream.content(answer, source=self.name, stage="generation")
@@ -86,6 +91,11 @@ class DeepQuestionCapability(BaseCapability):
         history_context = str(
             context.metadata.get("conversation_context_text", "") or ""
         ).strip()
+        if context.memory_context:
+            memory_context = str(context.memory_context or "").strip()
+            history_context = "\n\n".join(
+                part for part in [history_context, memory_context] if part
+            )
         enabled_tools = set(
             self.manifest.tools_used
             if context.enabled_tools is None

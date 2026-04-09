@@ -9,6 +9,7 @@ Wraps the existing ``MainSolver``.
 from __future__ import annotations
 
 import asyncio
+
 from deeptutor.capabilities.request_contracts import get_capability_request_schema
 from deeptutor.core.capability_protocol import BaseCapability, CapabilityManifest
 from deeptutor.core.context import UnifiedContext
@@ -249,6 +250,7 @@ class DeepSolveCapability(BaseCapability):
             conversation_context=str(
                 context.metadata.get("conversation_context_text", "") or ""
             ).strip(),
+            long_term_memory_context=str(context.memory_context or "").strip(),
         )
 
         final_answer = result.get("final_answer", "")

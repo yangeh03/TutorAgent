@@ -10,13 +10,13 @@ Memory is shared across all bots via ``data/memory/``.
 from __future__ import annotations
 
 import asyncio
-import logging
-import shutil
-import sys
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
+import logging
 from pathlib import Path
+import shutil
+import sys
 from typing import Any
 
 import yaml
@@ -232,10 +232,10 @@ class TutorBotManager:
             config = BotConfig(name=bot_id)
             self._save_bot_config(bot_id, config)
 
-        from deeptutor.tutorbot.providers.deeptutor_adapter import create_deeptutor_provider
-        from deeptutor.tutorbot.bus.queue import MessageBus
         from deeptutor.tutorbot.agent.loop import AgentLoop
+        from deeptutor.tutorbot.bus.queue import MessageBus
         from deeptutor.tutorbot.config.schema import ExecToolConfig
+        from deeptutor.tutorbot.providers.deeptutor_adapter import create_deeptutor_provider
         from deeptutor.tutorbot.session.manager import SessionManager
 
         provider = create_deeptutor_provider()
@@ -260,7 +260,7 @@ class TutorBotManager:
             model=config.model,
             exec_config=exec_config,
             session_manager=session_adapter,
-            shared_memory_dir=None,
+            shared_memory_dir=self._shared_memory_dir,
             restrict_to_workspace=False,
             default_session_key=canonical_key,
         )

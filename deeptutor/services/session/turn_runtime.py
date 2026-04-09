@@ -5,11 +5,11 @@ Turn-level runtime manager for unified chat streaming.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 import contextlib
+from dataclasses import dataclass, field
 import json
 import logging
-from collections.abc import AsyncIterator
-from dataclasses import dataclass, field
 from typing import Any
 
 from deeptutor.core.stream import StreamEvent, StreamEventType
@@ -337,12 +337,12 @@ class TurnRuntimeManager:
         assistant_content = ""
 
         try:
+            from deeptutor.agents.notebook import NotebookAnalysisAgent
             from deeptutor.core.context import Attachment, UnifiedContext
             from deeptutor.runtime.orchestrator import ChatOrchestrator
-            from deeptutor.agents.notebook import NotebookAnalysisAgent
+            from deeptutor.services.llm.config import get_llm_config
             from deeptutor.services.memory import get_memory_service
             from deeptutor.services.notebook import notebook_manager
-            from deeptutor.services.llm.config import get_llm_config
             from deeptutor.services.session.context_builder import ContextBuilder
 
             request_config = dict(payload.get("config", {}) or {})
@@ -387,7 +387,13 @@ class TurnRuntimeManager:
                 on_event=lambda event: self._persist_and_publish(execution, event),
             )
             memory_service = get_memory_service()
-            memory_context = memory_service.build_memory_context()
+            try:
+                memory_context = memory_service.build_memory_context(
+                    query=raw_user_content,
+                    capability=capability_name or "chat",
+                )
+            except TypeError:
+                memory_context = memory_service.build_memory_context()
 
             if notebook_references:
                 referenced_records = notebook_manager.get_records_by_references(notebook_references)
