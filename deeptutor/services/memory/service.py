@@ -4,21 +4,38 @@ Two-file public memory system: SUMMARY.md and PROFILE.md.
 - SUMMARY: Running summary of the user's learning journey (auto-updated).
 - PROFILE: User identity, preferences, knowledge levels (auto-updated).
 
+When mem0 is enabled (``MEM0_ENABLED=true``), the underlying long-term facts
+are stored in a local ChromaDB vector store via mem0.  PROFILE.md and
+SUMMARY.md become *projected governance views* — still human-editable, but
+regenerated from mem0 when facts change.
+
 Per-bot files (SOUL.md, TOOLS.md, USER.md, etc.) live in each bot's
 workspace directory, not in the shared memory dir.
 """
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from deeptutor.services.llm import stream as llm_stream
 from deeptutor.services.path_service import PathService, get_path_service
 from deeptutor.services.session.sqlite_store import SQLiteSessionStore, get_sqlite_session_store
+
+from .contracts import MemoryCategory, MemoryRecord
+from .ingestion import SharedMemoryIngestion
+from .projection import SharedMemoryProjection
+from .provider import (
+    BaseLongTermMemoryProvider,
+    NullLongTermMemoryProvider,
+    create_long_term_memory_provider,
+)
+
+logger = logging.getLogger(__name__)
 
 MemoryFile = Literal["summary", "profile"]
 MEMORY_FILES: list[MemoryFile] = ["summary", "profile"]
@@ -28,6 +45,20 @@ _NO_CHANGE = "NO_CHANGE"
 _FILENAMES: dict[MemoryFile, str] = {
     "summary": "SUMMARY.md",
     "profile": "PROFILE.md",
+}
+
+# ── Category mapping for manual edit sync-back ───────────────────────
+
+_SECTION_TO_CATEGORY: dict[str, MemoryCategory] = {
+    "identity": MemoryCategory.IDENTITY,
+    "preferences": MemoryCategory.PREFERENCE,
+    "learning style": MemoryCategory.PREFERENCE,
+    "knowledge level": MemoryCategory.KNOWLEDGE_LEVEL,
+    "learning goals": MemoryCategory.LEARNING_GOAL,
+    "current focus": MemoryCategory.CURRENT_TOPIC,
+    "accomplishments": MemoryCategory.COMPLETED_NODE,
+    "open questions": MemoryCategory.OPEN_QUESTION,
+    "areas for improvement": MemoryCategory.RECURRING_MISTAKE,
 }
 
 
@@ -47,16 +78,26 @@ class MemoryUpdateResult:
 
 
 class MemoryService:
-    """Two-file public memory: SUMMARY + PROFILE."""
+    """Two-file public memory with optional mem0 L2 backend."""
 
     def __init__(
         self,
         path_service: PathService | None = None,
         store: SQLiteSessionStore | None = None,
+        provider: BaseLongTermMemoryProvider | None = None,
     ) -> None:
         self._path_service = path_service or get_path_service()
         self._store = store or get_sqlite_session_store()
+
+        self._provider = provider or create_long_term_memory_provider()
+        self._ingestion = SharedMemoryIngestion(self._provider)
+        self._projection = SharedMemoryProjection(self._provider)
+
         self._migrate_legacy()
+
+    @property
+    def provider(self) -> BaseLongTermMemoryProvider:
+        return self._provider
 
     @property
     def _memory_dir(self) -> Path:
@@ -153,7 +194,34 @@ class MemoryService:
 
     # ── Context building (injected into LLM prompts) ─────────────────
 
-    def build_memory_context(self, max_chars: int = 4000) -> str:
+    def build_memory_context(
+        self,
+        max_chars: int = 4000,
+        *,
+        capability: str = "chat",
+        query: str = "",
+    ) -> str:
+        """Build the memory_context string for a capability.
+
+        When mem0 is available, generates a capability-aware context from
+        the vector store.  Otherwise falls back to reading the Markdown files.
+        """
+        if self._provider.is_available():
+            try:
+                ctx = self._projection.project_capability_context(
+                    capability=capability,
+                    query=query,
+                    max_chars=max_chars,
+                )
+                if ctx:
+                    return ctx
+            except Exception:
+                logger.debug("mem0 projection failed; falling back to files", exc_info=True)
+
+        return self._build_memory_context_from_files(max_chars)
+
+    def _build_memory_context_from_files(self, max_chars: int = 4000) -> str:
+        """Original file-based memory context builder (fallback)."""
         parts: list[str] = []
 
         profile = self.read_profile()
@@ -196,22 +264,35 @@ class MemoryService:
         if not user_message.strip() or not assistant_message.strip():
             return MemoryUpdateResult(content="", changed=False, updated_at=None)
 
-        source = (
-            f"[Session] {session_id or '(unknown)'}\n"
-            f"[Capability] {capability or 'chat'}\n"
-            f"[Timestamp] {timestamp or datetime.now().isoformat()}\n\n"
-            f"[User]\n{user_message.strip()}\n\n"
-            f"[Assistant]\n{assistant_message.strip()}"
-        )
+        # ── mem0 path ────────────────────────────────────────────────
+        if self._provider.is_available():
+            try:
+                result = await self._ingestion.ingest_turn(
+                    user_message=user_message,
+                    assistant_message=assistant_message,
+                    session_id=session_id,
+                    capability=capability or "chat",
+                    language=language,
+                )
+                if result.changed:
+                    self._refresh_files_from_projection()
+                snap = self.read_snapshot()
+                return MemoryUpdateResult(
+                    content=snap.profile,
+                    changed=result.changed,
+                    updated_at=snap.profile_updated_at,
+                )
+            except Exception:
+                logger.debug("mem0 ingestion failed; falling back to legacy", exc_info=True)
 
-        p_changed = await self._rewrite_one("profile", source, language)
-        s_changed = await self._rewrite_one("summary", source, language)
-
-        snap = self.read_snapshot()
-        return MemoryUpdateResult(
-            content=snap.profile,
-            changed=p_changed or s_changed,
-            updated_at=snap.profile_updated_at,
+        # ── Legacy LLM-rewrite path ─────────────────────────────────
+        return await self._refresh_from_turn_legacy(
+            user_message=user_message,
+            assistant_message=assistant_message,
+            session_id=session_id,
+            capability=capability,
+            language=language,
+            timestamp=timestamp,
         )
 
     async def refresh_from_session(
@@ -240,6 +321,33 @@ class MemoryService:
         if not relevant:
             return MemoryUpdateResult(content="", changed=False, updated_at=None)
 
+        # ── mem0 path: ingest message pairs ──────────────────────────
+        if self._provider.is_available():
+            any_changed = False
+            for i in range(0, len(relevant) - 1, 2):
+                user_msg = str(relevant[i].get("content", "")).strip()
+                asst_msg = str(relevant[i + 1].get("content", "")).strip() if i + 1 < len(relevant) else ""
+                if user_msg and asst_msg:
+                    try:
+                        result = await self._ingestion.ingest_turn(
+                            user_message=user_msg,
+                            assistant_message=asst_msg,
+                            session_id=target,
+                            language=language,
+                        )
+                        any_changed = any_changed or result.changed
+                    except Exception:
+                        logger.debug("mem0 session ingestion failed for pair", exc_info=True)
+            if any_changed:
+                self._refresh_files_from_projection()
+            snap = self.read_snapshot()
+            return MemoryUpdateResult(
+                content=snap.profile,
+                changed=any_changed,
+                updated_at=snap.profile_updated_at,
+            )
+
+        # ── Legacy path ──────────────────────────────────────────────
         transcript = "\n\n".join(
             f"{'User' if m.get('role') == 'user' else 'Assistant'}: "
             f"{str(m.get('content', '') or '').strip()}"
@@ -267,7 +375,116 @@ class MemoryService:
             updated_at=snap.profile_updated_at,
         )
 
-    # ── LLM rewrite for individual files ──────────────────────────────
+    # ── Projection refresh ────────────────────────────────────────────
+
+    def _refresh_files_from_projection(self) -> None:
+        """Re-generate PROFILE.md and SUMMARY.md from mem0 records."""
+        try:
+            profile_text = self._projection.project_profile()
+            if profile_text:
+                self.write_file("profile", profile_text)
+
+            summary_text = self._projection.project_summary()
+            if summary_text:
+                self.write_file("summary", summary_text)
+        except Exception:
+            logger.debug("Failed to project files from mem0", exc_info=True)
+
+    # ── Manual edit sync-back ─────────────────────────────────────────
+
+    async def sync_file_to_provider(self, which: MemoryFile) -> None:
+        """Sync a manually-edited Markdown file back to mem0.
+
+        Parses the file into bullet items, deletes old records for the
+        relevant categories, and re-adds each item with ``source=manual``.
+        Manual edits always take priority over auto-extracted facts.
+        """
+        if not self._provider.is_available():
+            return
+
+        content = self.read_file(which)
+        items = self._parse_markdown_items(content)
+        if not items:
+            return
+
+        # Determine which categories this file covers
+        from .contracts import PROFILE_CATEGORIES, SUMMARY_CATEGORIES
+        categories = PROFILE_CATEGORIES if which == "profile" else SUMMARY_CATEGORIES
+
+        # Delete existing records for these categories
+        existing = self._provider.get_all(categories=categories)
+        for record in existing:
+            self._provider.delete(record.id)
+
+        # Re-add parsed items
+        for category, text in items:
+            self._provider.add(
+                text,
+                category=category,
+                metadata={"source": "manual"},
+            )
+
+    @staticmethod
+    def _parse_markdown_items(content: str) -> list[tuple[MemoryCategory, str]]:
+        """Parse Markdown into (category, text) pairs from ``## Section`` headers."""
+        items: list[tuple[MemoryCategory, str]] = []
+        current_cat = MemoryCategory.PREFERENCE
+
+        for line in content.split("\n"):
+            stripped = line.strip()
+            if stripped.startswith("## "):
+                heading = stripped[3:].strip().lower()
+                current_cat = _SECTION_TO_CATEGORY.get(heading, MemoryCategory.PREFERENCE)
+            elif stripped.startswith("- "):
+                text = stripped[2:].strip()
+                if text:
+                    items.append((current_cat, text))
+
+        return items
+
+    # ── Provider-level operations ─────────────────────────────────────
+
+    def search(self, query: str, *, limit: int = 20) -> list[MemoryRecord]:
+        """Semantic search over mem0 records."""
+        if not self._provider.is_available():
+            return []
+        return self._provider.search(query, limit=limit)
+
+    def clear_provider_memories(self) -> None:
+        """Wipe all mem0 records for the current user."""
+        if self._provider.is_available():
+            self._provider.delete_all()
+
+    # ── Legacy LLM rewrite helpers ────────────────────────────────────
+
+    async def _refresh_from_turn_legacy(
+        self,
+        *,
+        user_message: str,
+        assistant_message: str,
+        session_id: str = "",
+        capability: str = "",
+        language: str = "en",
+        timestamp: str = "",
+    ) -> MemoryUpdateResult:
+        """Original LLM-rewrite path (used when mem0 is unavailable)."""
+        source = (
+            f"[Session] {session_id or '(unknown)'}\n"
+            f"[Capability] {capability or 'chat'}\n"
+            f"[Timestamp] {timestamp or datetime.now().isoformat()}\n\n"
+            f"[User]\n{user_message.strip()}\n\n"
+            f"[Assistant]\n{assistant_message.strip()}"
+        )
+
+        p_changed = await self._rewrite_one("profile", source, language)
+        s_changed = await self._rewrite_one("summary", source, language)
+
+        snap = self.read_snapshot()
+        return MemoryUpdateResult(
+            content=snap.profile,
+            changed=p_changed or s_changed,
+            updated_at=snap.profile_updated_at,
+        )
 
     async def _rewrite_one(self, which: MemoryFile, source: str, language: str) -> bool:
         """Rewrite a single memory file. Returns True if changed."""

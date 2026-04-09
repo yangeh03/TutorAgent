@@ -40,6 +40,7 @@ server = [
     "websockets>=12.0",
     "python-multipart>=0.0.6",
 ]
+memory = ["mem0ai>=0.1.29", "chromadb>=0.5.0"]
 math-animator = ["manim>=0.19.0"]
 all = [
     "anthropic>=0.30.0",
@@ -49,6 +50,8 @@ all = [
     "uvicorn[standard]>=0.24.0",
     "websockets>=12.0",
     "python-multipart>=0.0.6",
+    "mem0ai>=0.1.29",
+    "chromadb>=0.5.0",
     "manim>=0.19.0",
 ]
 

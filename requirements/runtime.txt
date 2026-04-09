@@ -41,5 +41,9 @@ arxiv>=2.0.0
 # --- Web search ---
 ddgs>=9.9.1
 
+# --- Long-term memory (mem0 L2 backend) ---
+mem0ai>=0.1.29
+chromadb>=0.5.0
+
 # --- Shared terminal rendering used outside the removed CLI package ---
 rich>=13.0.0

@@ -1,10 +1,15 @@
 """
 Two-file public memory API: SUMMARY and PROFILE.
+
+When mem0 is enabled, manual edits are synced back to the vector store
+and a semantic search endpoint is available.
 """
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from dataclasses import asdict
+
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from deeptutor.services.memory import MemoryFile, get_memory_service
@@ -47,7 +52,15 @@ async def get_memory():
 async def update_memory(payload: FileUpdateRequest):
     if payload.file not in _VALID_FILES:
         raise HTTPException(status_code=400, detail=f"Invalid file: {payload.file}")
-    snap = get_memory_service().write_file(payload.file, payload.content)
+    svc = get_memory_service()
+    snap = svc.write_file(payload.file, payload.content)
+
+    # Sync manual edit back to mem0 (manual > auto)
+    try:
+        await svc.sync_file_to_provider(payload.file)
+    except Exception:
+        pass  # Non-critical; file is already saved
+
     return {**_snap_dict(snap), "saved": True}
 
 
@@ -79,4 +92,22 @@ async def clear_memory(payload: MemoryClearRequest | None = None):
         snap = svc.clear_file(target)
     else:
         snap = svc.clear_memory()
+
+    # Also clear mem0 records
+    svc.clear_provider_memories()
+
     return {**_snap_dict(snap), "cleared": True}
+
+
+@router.get("/search")
+async def search_memory(
+    q: str = Query(..., min_length=1, description="Search query"),
+    limit: int = Query(20, ge=1, le=100),
+):
+    """Semantic search over long-term memory records (mem0)."""
+    svc = get_memory_service()
+    records = svc.search(q, limit=limit)
+    return {
+        "results": [asdict(r) for r in records],
+        "count": len(records),
+    }
