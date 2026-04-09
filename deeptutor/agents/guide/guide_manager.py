@@ -16,6 +16,7 @@ import yaml
 
 from deeptutor.logging import get_logger
 from deeptutor.services.config import load_config_with_main, parse_language
+from deeptutor.services.memory import MemoryService, get_memory_service
 from deeptutor.services.path_service import get_path_service
 
 from .agents import ChatAgent, DesignAgent, InteractiveAgent, SummaryAgent
@@ -80,6 +81,7 @@ class GuideManager:
         output_dir: str | None = None,
         config_path: str | None = None,
         binding: str = "openai",
+        memory_service: MemoryService | None = None,
     ):
         """
         Initialize manager
@@ -141,6 +143,7 @@ class GuideManager:
                 path_service = get_path_service()
                 self.output_dir = path_service.get_guide_dir()
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.memory_service = memory_service or get_memory_service()
 
         self.design_agent = DesignAgent(
             api_key,
@@ -406,7 +409,18 @@ class GuideManager:
 
         session_id = str(uuid.uuid4())[:8]
 
-        design_result = await self.design_agent.process(user_input=user_input)
+        memory_context = self.memory_service.build_memory_context(
+            query=user_input,
+            capability="guide",
+        )
+        design_input = user_input
+        if memory_context:
+            design_input = (
+                f"[Shared Memory]\n{memory_context}\n\n"
+                f"[Learning Request]\n{user_input}"
+            )
+
+        design_result = await self.design_agent.process(user_input=design_input)
 
         if not design_result.get("success"):
             self.logger.warning(
@@ -595,6 +609,22 @@ class GuideManager:
             }
         )
         self._save_session(session)
+
+        try:
+            await self.memory_service.refresh_from_guide_completion(
+                notebook_name=session.notebook_name,
+                knowledge_points=session.knowledge_points,
+                chat_history=session.chat_history,
+                summary=session.summary,
+                session_id=session.session_id,
+                language=self.language,
+            )
+        except Exception:
+            self.logger.warning(
+                "Guide completion memory sync failed: session=%s",
+                session_id,
+                exc_info=True,
+            )
 
         return {
             "success": True,

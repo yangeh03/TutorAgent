@@ -20,8 +20,10 @@ def _build_app() -> FastAPI:
 def _make_snapshot(
     summary: str = "",
     profile: str = "",
+    progress: str = "",
     summary_updated_at: str | None = None,
     profile_updated_at: str | None = None,
+    progress_updated_at: str | None = None,
 ):
     return type(
         "Snapshot",
@@ -29,8 +31,10 @@ def _make_snapshot(
         {
             "summary": summary,
             "profile": profile,
+            "progress": progress,
             "summary_updated_at": summary_updated_at,
             "profile_updated_at": profile_updated_at,
+            "progress_updated_at": progress_updated_at,
         },
     )()
 
@@ -53,7 +57,9 @@ def test_memory_router_returns_single_document(monkeypatch) -> None:
     assert body["profile"] == "## Preferences\n- Prefer concise answers."
     assert body["profile_updated_at"] == "2026-03-13T12:00:00+08:00"
     assert body["summary"] == ""
+    assert body["progress"] == ""
     assert body["summary_updated_at"] is None
+    assert body["progress_updated_at"] is None
 
 
 def test_memory_router_refreshes_from_session(monkeypatch) -> None:

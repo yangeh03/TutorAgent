@@ -1,8 +1,9 @@
 """
-Two-file public memory system: SUMMARY.md and PROFILE.md.
+Shared governance views for long-term memory.
 
-- SUMMARY: Running summary of the user's learning journey (auto-updated).
-- PROFILE: User identity, preferences, knowledge levels (auto-updated).
+- PROFILE: Stable user identity, preferences, knowledge levels.
+- SUMMARY: High-level learning journey summary.
+- PROGRESS: Topic-level learning progress across guided learning.
 
 Per-bot files (SOUL.md, TOOLS.md, USER.md, etc.) live in each bot's
 workspace directory, not in the shared memory dir.
@@ -21,6 +22,7 @@ from deeptutor.services.llm import stream as llm_stream
 from deeptutor.services.memory.ingestion import SharedMemoryIngestion
 from deeptutor.services.memory.projection import (
     PROFILE_CATEGORIES,
+    PROGRESS_CATEGORIES,
     SUMMARY_CATEGORIES,
     SharedMemoryProjection,
 )
@@ -31,14 +33,15 @@ from deeptutor.services.memory.provider import (
 from deeptutor.services.path_service import PathService, get_path_service
 from deeptutor.services.session.sqlite_store import SQLiteSessionStore, get_sqlite_session_store
 
-MemoryFile = Literal["summary", "profile"]
-MEMORY_FILES: list[MemoryFile] = ["summary", "profile"]
+MemoryFile = Literal["summary", "profile", "progress"]
+MEMORY_FILES: list[MemoryFile] = ["summary", "profile", "progress"]
 
 _NO_CHANGE = "NO_CHANGE"
 
 _FILENAMES: dict[MemoryFile, str] = {
     "summary": "SUMMARY.md",
     "profile": "PROFILE.md",
+    "progress": "PROGRESS.md",
 }
 
 logger = logging.getLogger(__name__)
@@ -48,8 +51,10 @@ logger = logging.getLogger(__name__)
 class MemorySnapshot:
     summary: str
     profile: str
+    progress: str
     summary_updated_at: str | None
     profile_updated_at: str | None
+    progress_updated_at: str | None
 
 
 @dataclass
@@ -60,7 +65,7 @@ class MemoryUpdateResult:
 
 
 class MemoryService:
-    """Two-file public memory: SUMMARY + PROFILE."""
+    """Shared governance views for long-term memory."""
 
     def __init__(
         self,
@@ -86,11 +91,11 @@ class MemoryService:
         return self._memory_dir / _FILENAMES[which]
 
     def _migrate_legacy(self) -> None:
-        """One-time migration from old memory.md to the two-file system."""
+        """One-time migration from old memory.md to the governance-view system."""
         legacy = self._memory_dir / "memory.md"
         if not legacy.exists():
             return
-        if self._path("profile").exists() or self._path("summary").exists():
+        if any(self._path(view).exists() for view in MEMORY_FILES):
             return
 
         content = legacy.read_text(encoding="utf-8").strip()
@@ -145,6 +150,9 @@ class MemoryService:
     def read_profile(self) -> str:
         return self.read_file("profile")
 
+    def read_progress(self) -> str:
+        return self.read_file("progress")
+
     def _file_updated_at(self, which: MemoryFile) -> str | None:
         path = self._path(which)
         if not path.exists():
@@ -163,8 +171,10 @@ class MemoryService:
         return MemorySnapshot(
             summary=self.read_summary(),
             profile=self.read_profile(),
+            progress=self.read_progress(),
             summary_updated_at=self._file_updated_at("summary"),
             profile_updated_at=self._file_updated_at("profile"),
+            progress_updated_at=self._file_updated_at("progress"),
         )
 
     # ── Write ─────────────────────────────────────────────────────────
@@ -177,7 +187,11 @@ class MemoryService:
             try:
                 self._clear_provider_view(which)
             except Exception:
-                logger.debug("Failed to clear provider-backed %s memories on empty save", which, exc_info=True)
+                logger.debug(
+                    "Failed to clear provider-backed %s memories on empty save",
+                    which,
+                    exc_info=True,
+                )
         if not normalized:
             if path.exists():
                 path.unlink()
@@ -207,8 +221,8 @@ class MemoryService:
                 self._provider.clear()
             except Exception:
                 logger.debug("Failed to clear provider-backed memories", exc_info=True)
-        for f in MEMORY_FILES:
-            path = self._path(f)
+        for view in MEMORY_FILES:
+            path = self._path(view)
             if path.exists():
                 path.unlink()
         return self.read_snapshot()
@@ -225,11 +239,7 @@ class MemoryService:
         if self._provider.is_enabled():
             try:
                 all_records = self._provider.list_memories()
-                search_records = (
-                    self._provider.search(query=query, limit=12)
-                    if str(query or "").strip()
-                    else []
-                )
+                search_records = self._provider.search(query=query, limit=12) if str(query or "").strip() else []
                 projected = self._projection.build_context(
                     all_records=all_records,
                     search_records=search_records,
@@ -250,6 +260,10 @@ class MemoryService:
         summary = self.read_summary()
         if summary:
             parts.append(f"### Learning Context\n{summary}")
+
+        progress = self.read_progress()
+        if progress:
+            parts.append(f"### Learning Progress\n{progress}")
 
         if not parts:
             return ""
@@ -343,24 +357,25 @@ class MemoryService:
 
         messages = await self._store.get_messages_for_context(target)
         relevant = [
-            m for m in messages
-            if str(m.get("role", "")) in {"user", "assistant"}
-            and str(m.get("content", "") or "").strip()
+            message
+            for message in messages
+            if str(message.get("role", "")) in {"user", "assistant"}
+            and str(message.get("content", "") or "").strip()
         ][-max_messages:]
 
         if not relevant:
             return MemoryUpdateResult(content="", changed=False, updated_at=None)
 
         if self._provider.is_enabled():
-            cap = ""
-            sess = await self._store.get_session(target)
-            if sess:
-                cap = str(sess.get("capability", "") or "")
+            capability = ""
+            session = await self._store.get_session(target)
+            if session:
+                capability = str(session.get("capability", "") or "")
             changed = self._ingestor.ingest_session(
                 self._provider,
                 messages=relevant,
                 session_id=target,
-                capability=cap or "chat",
+                capability=capability or "chat",
                 language=language,
             )
             snap = self.read_snapshot()
@@ -371,19 +386,19 @@ class MemoryService:
             )
 
         transcript = "\n\n".join(
-            f"{'User' if m.get('role') == 'user' else 'Assistant'}: "
-            f"{str(m.get('content', '') or '').strip()}"
-            for m in relevant
+            f"{'User' if message.get('role') == 'user' else 'Assistant'}: "
+            f"{str(message.get('content', '') or '').strip()}"
+            for message in relevant
         )
 
-        cap = ""
-        sess = await self._store.get_session(target)
-        if sess:
-            cap = str(sess.get("capability", "") or "")
+        capability = ""
+        session = await self._store.get_session(target)
+        if session:
+            capability = str(session.get("capability", "") or "")
 
         source = (
             f"[Session] {target}\n"
-            f"[Capability] {cap or 'chat'}\n\n"
+            f"[Capability] {capability or 'chat'}\n\n"
             f"[Recent Transcript]\n{transcript}"
         )
 
@@ -397,6 +412,52 @@ class MemoryService:
             updated_at=snap.profile_updated_at,
         )
 
+    async def refresh_from_guide_completion(
+        self,
+        *,
+        notebook_name: str,
+        knowledge_points: list[dict[str, object]],
+        chat_history: list[dict[str, object]],
+        summary: str,
+        session_id: str = "",
+        language: str = "en",
+    ) -> MemoryUpdateResult:
+        if self._provider.is_enabled():
+            changed = self._ingestor.ingest_guide_completion(
+                self._provider,
+                notebook_name=notebook_name,
+                knowledge_points=knowledge_points,
+                chat_history=chat_history,
+                summary=summary,
+                session_id=session_id,
+            )
+            snap = self.read_snapshot()
+            return MemoryUpdateResult(
+                content=snap.progress,
+                changed=changed,
+                updated_at=snap.progress_updated_at,
+            )
+
+        progress_doc = self._build_progress_markdown(
+            notebook_name=notebook_name,
+            knowledge_points=knowledge_points,
+            summary=summary,
+        )
+        summary_doc = self._build_guide_summary_markdown(
+            notebook_name=notebook_name,
+            knowledge_points=knowledge_points,
+            summary=summary,
+        )
+        self.write_file("progress", progress_doc)
+        if summary_doc:
+            self.write_file("summary", summary_doc)
+        snap = self.read_snapshot()
+        return MemoryUpdateResult(
+            content=snap.progress,
+            changed=bool(progress_doc or summary_doc),
+            updated_at=snap.progress_updated_at,
+        )
+
     # ── LLM rewrite for individual files ──────────────────────────────
 
     async def _rewrite_one(self, which: MemoryFile, source: str, language: str) -> bool:
@@ -406,17 +467,19 @@ class MemoryService:
 
         if which == "profile":
             sys_prompt, user_prompt = self._profile_prompts(current, source, zh)
-        else:
+        elif which == "summary":
             sys_prompt, user_prompt = self._summary_prompts(current, source, zh)
+        else:
+            return False
 
         chunks: list[str] = []
-        async for c in llm_stream(
+        async for chunk in llm_stream(
             prompt=user_prompt,
             system_prompt=sys_prompt,
             temperature=0.2,
             max_tokens=900,
         ):
-            chunks.append(c)
+            chunks.append(chunk)
 
         raw = _strip_code_fence("".join(chunks)).strip()
         if not raw or raw == _NO_CHANGE:
@@ -481,6 +544,7 @@ class MemoryService:
         projected = self._projection.project_views(records)
         self._write_projection_file("profile", projected.profile)
         self._write_projection_file("summary", projected.summary)
+        self._write_projection_file("progress", projected.progress)
 
     def _write_projection_file(self, which: MemoryFile, content: str) -> None:
         path = self._path(which)
@@ -493,7 +557,12 @@ class MemoryService:
         path.write_text(normalized, encoding="utf-8")
 
     def _clear_provider_view(self, which: MemoryFile) -> None:
-        scope_categories = PROFILE_CATEGORIES if which == "profile" else SUMMARY_CATEGORIES
+        if which == "profile":
+            scope_categories = PROFILE_CATEGORIES
+        elif which == "progress":
+            scope_categories = PROGRESS_CATEGORIES
+        else:
+            scope_categories = SUMMARY_CATEGORIES
         to_delete = []
         for item in self._provider.list_memories():
             category = str(item.category or item.metadata.get("category", "") or "").strip().lower()
@@ -503,6 +572,101 @@ class MemoryService:
                     to_delete.append(item.id)
         if to_delete:
             self._provider.delete_memories(to_delete)
+
+    def _build_progress_markdown(
+        self,
+        *,
+        notebook_name: str,
+        knowledge_points: list[dict[str, object]],
+        summary: str,
+    ) -> str:
+        topic = str(notebook_name or "").strip() or "Guided Learning"
+        completed = [
+            str(point.get("knowledge_title", "") or "").strip()
+            for point in knowledge_points
+            if str(point.get("knowledge_title", "") or "").strip()
+        ]
+        needs_review, misconceptions, next_steps = self._extract_progress_sections(summary)
+
+        parts = ["## Active Topics", f"- {topic}", "", f"## Topic: {topic}"]
+        if completed:
+            parts.append("### Completed Points")
+            parts.extend(f"- {line}" for line in completed[:12])
+            parts.append("")
+        if needs_review:
+            parts.append("### Needs Review")
+            parts.extend(f"- {line}" for line in needs_review[:8])
+            parts.append("")
+        if misconceptions:
+            parts.append("### Recurring Misconceptions")
+            parts.extend(f"- {line}" for line in misconceptions[:8])
+            parts.append("")
+        if next_steps:
+            parts.append("### Next Steps")
+            parts.extend(f"- {line}" for line in next_steps[:8])
+            parts.append("")
+        while parts and not parts[-1]:
+            parts.pop()
+        return "\n".join(parts).strip()
+
+    def _build_guide_summary_markdown(
+        self,
+        *,
+        notebook_name: str,
+        knowledge_points: list[dict[str, object]],
+        summary: str,
+    ) -> str:
+        topic = str(notebook_name or "").strip() or "Guided Learning"
+        completed = [
+            str(point.get("knowledge_title", "") or "").strip()
+            for point in knowledge_points
+            if str(point.get("knowledge_title", "") or "").strip()
+        ]
+        needs_review, misconceptions, _next_steps = self._extract_progress_sections(summary)
+        parts = ["## Current Focus", f"- Guided learning: {topic}", ""]
+        if completed:
+            parts.append("## Accomplishments")
+            parts.extend(f"- Completed guided learning on {line}" for line in completed[:10])
+            parts.append("")
+        if needs_review or misconceptions:
+            parts.append("## Open Questions")
+            parts.extend(f"- {line}" for line in [*needs_review[:6], *misconceptions[:6]])
+            parts.append("")
+        while parts and not parts[-1]:
+            parts.pop()
+        return "\n".join(parts).strip()
+
+    @staticmethod
+    def _extract_progress_sections(summary: str) -> tuple[list[str], list[str], list[str]]:
+        needs_review: list[str] = []
+        misconceptions: list[str] = []
+        next_steps: list[str] = []
+        current_heading = ""
+        for raw in str(summary or "").replace("\r\n", "\n").splitlines():
+            stripped = raw.strip()
+            if not stripped:
+                continue
+            match = re.match(r"^#{2,3}\s+(.+?)\s*$", stripped)
+            if match:
+                current_heading = match.group(1).strip().lower()
+                continue
+            if not stripped.startswith(("- ", "* ")):
+                continue
+            bullet = stripped[2:].strip()
+            if not bullet:
+                continue
+            if any(key in current_heading for key in ("review", "薄弱", "弱项")):
+                if bullet not in needs_review:
+                    needs_review.append(bullet)
+                continue
+            if any(key in current_heading for key in ("question", "misconception", "误区")):
+                if bullet not in misconceptions:
+                    misconceptions.append(bullet)
+                continue
+            if any(key in current_heading for key in ("suggest", "next", "建议", "后续")):
+                if bullet not in next_steps:
+                    next_steps.append(bullet)
+        return needs_review, misconceptions, next_steps
 
     @staticmethod
     def _extract_legacy_sections(content: str) -> tuple[str, str]:

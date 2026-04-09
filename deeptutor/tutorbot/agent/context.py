@@ -1,11 +1,11 @@
 """Context builder for assembling agent prompts."""
 
 import base64
+from datetime import datetime
 import mimetypes
+from pathlib import Path
 import platform
 import time
-from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 from deeptutor.tutorbot.agent.memory import MemoryStore
@@ -108,7 +108,7 @@ Your workspace is at: {workspace_path}
 Reply directly with text for conversations. Only use the 'message' tool to send to a specific chat channel."""
 
     def _build_shared_memory(self) -> str:
-        """Build memory context from DeepTutor's shared memory (PROFILE + SUMMARY).
+        """Build memory context from DeepTutor's shared governance views.
 
         SOUL.md and other per-bot files are loaded from the workspace via
         BOOTSTRAP_FILES, so they are NOT read from the shared memory dir.
@@ -124,6 +124,10 @@ Reply directly with text for conversations. Only use the 'message' tool to send 
         summary = self._read_shared_file("SUMMARY.md")
         if summary:
             parts.append(f"## Learning Context\n{summary}")
+
+        progress = self._read_shared_file("PROGRESS.md")
+        if progress:
+            parts.append(f"## Learning Progress\n{progress}")
 
         if not parts:
             return ""

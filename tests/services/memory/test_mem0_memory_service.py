@@ -139,3 +139,32 @@ def test_mem0_clear_profile_keeps_summary_memories(tmp_path) -> None:
     assert "linear algebra" in snapshot.summary.lower()
     assert all(item.scope != "profile" for item in provider.list_memories())
 
+
+def test_mem0_refresh_from_guide_completion_projects_progress(tmp_path) -> None:
+    provider = FakeMem0Provider()
+    service = _make_service(tmp_path, provider=provider)
+
+    import asyncio
+
+    result = asyncio.run(
+        service.refresh_from_guide_completion(
+            notebook_name="Calculus / Derivatives",
+            knowledge_points=[
+                {"knowledge_title": "Derivative as rate of change"},
+                {"knowledge_title": "Chain rule basics"},
+            ],
+            chat_history=[{"role": "user", "content": "Why is instantaneous rate different?"}],
+            summary=(
+                "## Follow-up Learning Suggestions\n"
+                "- Review implicit differentiation.\n"
+                "- Practice mixed chain rule questions.\n"
+            ),
+            session_id="guide-1",
+        )
+    )
+
+    snapshot = service.read_snapshot()
+    assert result.changed is True
+    assert "calculus / derivatives" in snapshot.progress.lower()
+    assert "derivative as rate of change" in snapshot.progress.lower()
+    assert "practice mixed chain rule questions" in snapshot.progress.lower()

@@ -1,5 +1,5 @@
 """
-Two-file public memory API: SUMMARY and PROFILE.
+Shared governance view API: PROFILE, SUMMARY, and PROGRESS.
 """
 
 from __future__ import annotations
@@ -12,15 +12,17 @@ from deeptutor.services.session import get_sqlite_session_store
 
 router = APIRouter()
 
-_VALID_FILES: set[MemoryFile] = {"summary", "profile"}
+_VALID_FILES: set[MemoryFile] = {"summary", "profile", "progress"}
 
 
 def _snap_dict(snap) -> dict:
     return {
         "summary": snap.summary,
         "profile": snap.profile,
+        "progress": snap.progress,
         "summary_updated_at": snap.summary_updated_at,
         "profile_updated_at": snap.profile_updated_at,
+        "progress_updated_at": snap.progress_updated_at,
     }
 
 

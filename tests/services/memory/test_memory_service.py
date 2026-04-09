@@ -22,8 +22,10 @@ def test_memory_service_snapshot_is_empty_without_file(tmp_path) -> None:
 
     assert snapshot.summary == ""
     assert snapshot.profile == ""
+    assert snapshot.progress == ""
     assert snapshot.summary_updated_at is None
     assert snapshot.profile_updated_at is None
+    assert snapshot.progress_updated_at is None
 
 
 async def _no_change_stream(**_kwargs):

@@ -3,15 +3,19 @@
 from __future__ import annotations
 
 import asyncio
-import json
-import weakref
 from datetime import datetime
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable
+import weakref
 
 from loguru import logger
 
-from deeptutor.tutorbot.utils.helpers import ensure_dir, estimate_message_tokens, estimate_prompt_tokens_chain
+from deeptutor.tutorbot.utils.helpers import (
+    ensure_dir,
+    estimate_message_tokens,
+    estimate_prompt_tokens_chain,
+)
 
 if TYPE_CHECKING:
     from deeptutor.tutorbot.providers.base import LLMProvider
@@ -75,9 +79,10 @@ def _is_tool_choice_unsupported(content: str | None) -> bool:
 class MemoryStore:
     """Two-layer memory: long-term facts + grep-searchable history log.
 
-    Reads/writes go to ``data/memory/`` (shared with DeepTutor) — PROFILE.md
-    for long-term facts, SUMMARY.md for history.  Standalone fallback uses
-    workspace/memory/MEMORY.md + HISTORY.md when no shared dir is given.
+    Shared mode reads/writes governance views under ``data/memory/``.
+    TutorBot still treats PROFILE.md as editable long-term facts and
+    SUMMARY.md as the lightweight shared history surface. Standalone
+    fallback uses workspace/memory/MEMORY.md + HISTORY.md.
     """
 
     _MAX_FAILURES_BEFORE_RAW_ARCHIVE = 3

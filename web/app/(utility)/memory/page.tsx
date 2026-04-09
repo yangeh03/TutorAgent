@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Brain, Eraser, Loader2, RefreshCw, Save, BookOpen, User } from "lucide-react";
+import { Brain, Eraser, Loader2, RefreshCw, Save, BookOpen, ListChecks, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppShell } from "@/context/AppShellContext";
 import { apiUrl } from "@/lib/api";
@@ -11,13 +11,15 @@ const MarkdownRenderer = dynamic(() => import("@/components/common/MarkdownRende
   ssr: false,
 });
 
-type MemoryFile = "summary" | "profile";
+type MemoryFile = "summary" | "profile" | "progress";
 
 interface MemoryData {
   summary: string;
   profile: string;
+  progress: string;
   summary_updated_at: string | null;
   profile_updated_at: string | null;
+  progress_updated_at: string | null;
 }
 
 const TABS: { key: MemoryFile; label: string; icon: typeof Brain; hint: string; placeholder: string }[] = [
@@ -35,13 +37,23 @@ const TABS: { key: MemoryFile; label: string; icon: typeof Brain; hint: string; 
     hint: "User identity, preferences, and knowledge levels. Auto-updated after conversations.",
     placeholder: "## Identity\n- ...\n\n## Learning Style\n- ...\n\n## Knowledge Level\n- ...\n\n## Preferences\n- ...",
   },
+  {
+    key: "progress",
+    label: "Progress",
+    icon: ListChecks,
+    hint: "Knowledge-point progress across active learning topics. Guide completion can project here automatically.",
+    placeholder:
+      "## Active Topics\n- Calculus / Derivatives\n- Linear Algebra / Eigenvalues\n\n## Topic: Calculus / Derivatives\n### Completed Points\n- ...\n\n### Needs Review\n- ...\n\n### Recurring Misconceptions\n- ...\n\n### Next Steps\n- ...",
+  },
 ];
 
 const EMPTY: MemoryData = {
   summary: "",
   profile: "",
+  progress: "",
   summary_updated_at: null,
   profile_updated_at: null,
+  progress_updated_at: null,
 };
 
 function formatUpdatedAt(value: string | null): string {
@@ -61,7 +73,11 @@ export default function MemoryPage() {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<MemoryFile>("summary");
   const [activeView, setActiveView] = useState<"edit" | "preview">("edit");
-  const [editors, setEditors] = useState<Record<MemoryFile, string>>({ summary: "", profile: "" });
+  const [editors, setEditors] = useState<Record<MemoryFile, string>>({
+    summary: "",
+    profile: "",
+    progress: "",
+  });
   const [toast, setToast] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -82,7 +98,11 @@ export default function MemoryPage() {
       const res = await fetch(apiUrl("/api/v1/memory"));
       const d: MemoryData = await res.json();
       setData(d);
-      setEditors({ summary: d.summary || "", profile: d.profile || "" });
+      setEditors({
+        summary: d.summary || "",
+        profile: d.profile || "",
+        progress: d.progress || "",
+      });
     } finally {
       setLoading(false);
     }
@@ -117,7 +137,11 @@ export default function MemoryPage() {
       });
       const d: MemoryData = await res.json();
       setData(d);
-      setEditors({ summary: d.summary || "", profile: d.profile || "" });
+      setEditors({
+        summary: d.summary || "",
+        profile: d.profile || "",
+        progress: d.progress || "",
+      });
       setToast("Memory refreshed from session");
     } finally {
       setRefreshing(false);
