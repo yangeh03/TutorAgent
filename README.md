@@ -1,13 +1,13 @@
 <div align="center">
 
-<img src="assets/logo-ver2.png" alt="DeepTutor" width="140" style="border-radius: 15px;">
+<img src="assets/logo-ver2.png" alt="KnowMeTutor" width="140" style="border-radius: 15px;">
 
-# DeepTutor：智能体原生的个性化辅导
+# KnowMeTutor：智能体原生的个性化辅导
 
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square)](LICENSE)
-[核心亮点](#key-features) · [快速开始](#get-started) · [探索 DeepTutor](#explore-deeptutor) · [TutorBot](#tutorbot)
+[核心亮点](#key-features) · [快速开始](#get-started) · [探索 KnowMeTutor](#explore-knowmetutor) · [TutorBot](#tutorbot)
 
 </div>
 
@@ -30,8 +30,8 @@
 一条交互脚本完成依赖安装、环境配置、连通性检测与启动，无需手改 `.env`。
 
 ```bash
-git clone https://github.com/HKUDS/DeepTutor.git
-cd DeepTutor
+git clone https://github.com/HKUDS/KnowMeTutor.git
+cd KnowMeTutor
 
 # 创建 Python 环境
 conda create -n deeptutor python=3.11 && conda activate deeptutor
@@ -53,8 +53,8 @@ python scripts/start_tour.py
 **1. 安装依赖**
 
 ```bash
-git clone https://github.com/HKUDS/DeepTutor.git
-cd DeepTutor
+git clone https://github.com/HKUDS/KnowMeTutor.git
+cd KnowMeTutor
 
 conda create -n deeptutor python=3.11 && conda activate deeptutor
 pip install -e ".[server]"
@@ -175,8 +175,8 @@ Docker 将前后端打包为单容器，本机无需 Python/Node。任选其一�
 **1. 配置环境变量**（两种方式均需）
 
 ```bash
-git clone https://github.com/HKUDS/DeepTutor.git
-cd DeepTutor
+git clone https://github.com/HKUDS/KnowMeTutor.git
+cd KnowMeTutor
 cp .env.example .env
 ```
 
@@ -184,7 +184,7 @@ cp .env.example .env
 
 **2a. 拉取官方镜像（推荐）**
 
-镜像发布于 [GitHub Container Registry](https://github.com/HKUDS/DeepTutor/pkgs/container/deeptutor)，支持 `linux/amd64` 与 `linux/arm64`。
+镜像发布于 [GitHub Container Registry](https://github.com/HKUDS/KnowMeTutor/pkgs/container/deeptutor)，支持 `linux/amd64` 与 `linux/arm64`。
 
 ```bash
 docker compose -f docker-compose.ghcr.yml up -d
@@ -296,11 +296,11 @@ docker compose up -d     # 或 docker compose -f docker-compose.ghcr.yml up -d
 
 ---
 
-<a id="explore-deeptutor"></a>
-## 📖 探索 DeepTutor
+<a id="explore-knowmetutor"></a>
+## 📖 探索 KnowMeTutor
 
 <div align="center">
-<img src="assets/figs/deeptutor-architecture.png" alt="DeepTutor 架构" width="800">
+<img src="assets/figs/deeptutor-architecture.png" alt="KnowMeTutor 架构" width="800">
 </div>
 
 ### 💬 聊天 — 统一智能工作区
@@ -329,7 +329,7 @@ docker compose up -d     # 或 docker compose -f docker-compose.ghcr.yml up -d
 <img src="assets/figs/dt-guide.png" alt="引导式学习" width="800">
 </div>
 
-将个人材料变成结构化、多步学习路径：给出主题，可选关联笔记本记录，DeepTutor 将：
+将个人材料变成结构化、多步学习路径：给出主题，可选关联笔记本记录，KnowMeTutor 将：
 
 1. **设计学习计划** — 从材料中提炼 3 到 5 个递进知识点。
 2. **生成交互页面** — 每点对应富视觉 HTML 页面，含讲解、图示与示例。
@@ -357,7 +357,7 @@ docker compose up -d     # 或 docker compose -f docker-compose.ghcr.yml up -d
 <img src="assets/figs/dt-memory.png" alt="记忆" width="800">
 </div>
 
-DeepTutor 从两个互补维度持续理解你：
+KnowMeTutor 从两个互补维度持续理解你：
 
 - **摘要** — 学习进度流水账：学过什么、探索过哪些主题、理解如何演进。
 - **学习画像** — 学习者身份：偏好、水平、目标与沟通风格，随交互自动精炼。
@@ -380,7 +380,7 @@ TutorBot 不是聊天机器人，它是基于 [nanobot](https://github.com/HKUDS
 </div>
 
 - **Soul 模板** — 通过可编辑 Soul 文件定义人格、语气与教学理念；可选内置原型或完全自定义。
-- **独立工作区** — 每实例独立目录：记忆、会话、技能与配置隔离，仍可访问 DeepTutor 共享知识层。
+- **独立工作区** — 每实例独立目录：记忆、会话、技能与配置隔离，仍可访问 KnowMeTutor 共享知识层。
 - **主动心跳** — 不止被动回复：心跳系统支持定期学习提醒、复习与计划任务。
 - **完整工具** — RAG、代码执行、联网、论文检索、深度推理、头脑风暴。
 - **技能扩展** — 在工作区添加技能文件即可教会新能力。
